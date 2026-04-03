@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manifold Exploration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070b14;
+      --bg2:       #0d1220;
+      --cyan:      #00d4ff;
+      --cyan-dim:  rgba(0, 212, 255, 0.12);
+      --cyan-glow: rgba(0, 212, 255, 0.25);
+      --text:      #e2e8f0;
+      --text-muted:#7a8fa6;
+      --border:    rgba(0, 212, 255, 0.12);
+      --font:      'Inter', sans-serif;
+      --mono:      'JetBrains Mono', monospace;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .overlay {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .overlay h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .overlay h1 span {
+      color: var(--cyan);
+    }
+
+    .overlay p {
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      color: var(--text-muted);
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    .overlay .subtitle {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--cyan);
+      opacity: 0.7;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="surface"></canvas>
+
+  <div class="overlay">
+    <p class="subtitle">blog post</p>
+    <h1>Manifold <span>Exploration</span></h1>
+    <p>Smooth manifolds, Christoffel symbols, geodesics, and the geometry of curved spaces.</p>
+  </div>
+
+  <script>
+  (function () {
+    const canvas = document.getElementById('surface');
+    const ctx = canvas.getContext('2d');
+
+    let W, H;
+
+    // Torus parameters
+    const R = 8;          // major radius
+    const r = 3.2;        // minor radius
+    const NU = 60;        // subdivisions around tube
+    const NV = 60;        // subdivisions around ring
+    const SCALE = 28;     // screen scaling
+
+    // Mouse state (normalized -1..1)
+    let mx = 0, my = 0;
+    // Mouse position in u,v space for deformation
+    let mu = 0, mv = 0;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    window.addEventListener('mousemove', function (e) {
+      mx = (e.clientX / W) * 2 - 1;
+      my = (e.clientY / H) * 2 - 1;
+      // Map mouse to torus parameter space
+      mu = (e.clientX / W) * Math.PI * 2;
+      mv = (e.clientY / H) * Math.PI * 2;
+    });
+
+    // Torus point with deformation
+    function torusPoint(u, v, time) {
+      // Deformation: bump near mouse position on the surface
+      const du = Math.atan2(Math.sin(u - mu), Math.cos(u - mu));
+      const dv = Math.atan2(Math.sin(v - mv), Math.cos(v - mv));
+      const dist2 = du * du + dv * dv;
+      const bump = 1.8 * Math.exp(-dist2 * 3);
+
+      // Breathing animation
+      const breathe = Math.sin(time * 0.4) * 0.15;
+
+      const rr = r + bump + breathe * Math.sin(3 * u + time) * Math.cos(2 * v + time * 0.7);
+
+      const x = (R + rr * Math.cos(v)) * Math.cos(u);
+      const y = (R + rr * Math.cos(v)) * Math.sin(u);
+      const z = rr * Math.sin(v);
+
+      return { x, y, z };
+    }
+
+    // 3D -> 2D projection with rotation
+    function project(x, y, z, time) {
+      // Auto-rotation + mouse influence
+      const rotY = time * 0.15 + mx * 0.4;
+      const rotX = 0.45 + my * 0.3;
+
+      // Rotate around Y
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const x1 = x * cosY + z * sinY;
+      const z1 = -x * sinY + z * cosY;
+
+      // Rotate around X
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      const y1 = y * cosX - z1 * sinX;
+      const z2 = y * sinX + z1 * cosX;
+
+      return {
+        sx: W / 2 + x1 * SCALE,
+        sy: H / 2 + y1 * SCALE,
+        depth: z2
+      };
+    }
+
+    function draw(time) {
+      ctx.clearRect(0, 0, W, H);
+
+      const points = [];
+
+      // Compute all torus points
+      for (let i = 0; i <= NU; i++) {
+        points[i] = [];
+        const u = (i / NU) * Math.PI * 2;
+        for (let j = 0; j <= NV; j++) {
+          const v = (j / NV) * Math.PI * 2;
+          const p = torusPoint(u, v, time);
+          points[i][j] = project(p.x, p.y, p.z, time);
+        }
+      }
+
+      // Draw wireframe lines
+      for (let i = 0; i <= NU; i++) {
+        for (let j = 0; j < NV; j++) {
+          const a = points[i][j];
+          const b = points[i][j + 1];
+          drawEdge(a, b);
+        }
+      }
+      for (let j = 0; j <= NV; j++) {
+        for (let i = 0; i < NU; i++) {
+          const a = points[i][j];
+          const b = points[i + 1][j];
+          drawEdge(a, b);
+        }
+      }
+
+      requestAnimationFrame(() => draw(performance.now() / 1000));
+    }
+
+    function drawEdge(a, b) {
+      const avgDepth = (a.depth + b.depth) / 2;
+      const t = (avgDepth + r + R) / (2 * (r + R));
+      const alpha = 0.06 + 0.4 * Math.max(0, Math.min(1, t));
+      ctx.beginPath();
+      ctx.moveTo(a.sx, a.sy);
+      ctx.lineTo(b.sx, b.sy);
+      ctx.strokeStyle = `rgba(0, 212, 255, ${alpha})`;
+      ctx.lineWidth = 0.4 + alpha * 1.0;
+      ctx.stroke();
+    }
+
+    draw(0);
+  })();
+  </script>
+</body>
+</html>
