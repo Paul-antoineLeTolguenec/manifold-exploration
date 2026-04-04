@@ -95,16 +95,27 @@
     let W, H;
 
     // Torus parameters
-    const R = 8;          // major radius
-    const r = 3.2;        // minor radius
-    const NU = 60;        // subdivisions around tube
-    const NV = 60;        // subdivisions around ring
-    const SCALE = 28;     // screen scaling
+    const R = 8;
+    const r = 3.2;
+    const NU = 60;
+    const NV = 60;
+    const SCALE = 28;
+    const SPRING = 0.04;
+    const PULL_STRENGTH = 5.0;
+    const FALLOFF_RADIUS = 20; // in grid cells
 
-    // Mouse state (normalized -1..1)
-    let mx = 0, my = 0;
-    // Mouse position in u,v space for deformation
-    let mu = 0, mv = 0;
+    // Per-vertex scalar displacement along normal
+    const displace = [];
+    for (let i = 0; i <= NU; i++) {
+      displace[i] = new Float32Array(NV + 1);
+    }
+
+    let autoRotY = 0;
+    const rotXBase = 0.45;
+
+    let dragging = false;
+    let grabI = -1, grabJ = -1;
+    let grabScreenX = 0, grabScreenY = 0;
 
     function resize() {
       W = canvas.width = window.innerWidth;
@@ -113,86 +124,173 @@
     window.addEventListener('resize', resize);
     resize();
 
-    window.addEventListener('mousemove', function (e) {
-      mx = (e.clientX / W) * 2 - 1;
-      my = (e.clientY / H) * 2 - 1;
-      // Map mouse to torus parameter space
-      mu = (e.clientX / W) * Math.PI * 2;
-      mv = (e.clientY / H) * Math.PI * 2;
-    });
-
-    // Torus point with deformation
-    function torusPoint(u, v, time) {
-      // Deformation: bump near mouse position on the surface
-      const du = Math.atan2(Math.sin(u - mu), Math.cos(u - mu));
-      const dv = Math.atan2(Math.sin(v - mv), Math.cos(v - mv));
-      const dist2 = du * du + dv * dv;
-      const bump = 1.8 * Math.exp(-dist2 * 3);
-
-      // Breathing animation
-      const breathe = Math.sin(time * 0.4) * 0.15;
-
-      const rr = r + bump + breathe * Math.sin(3 * u + time) * Math.cos(2 * v + time * 0.7);
-
-      const x = (R + rr * Math.cos(v)) * Math.cos(u);
-      const y = (R + rr * Math.cos(v)) * Math.sin(u);
-      const z = rr * Math.sin(v);
-
+    // Torus rest position
+    function torusRest(u, v) {
+      const x = (R + r * Math.cos(v)) * Math.cos(u);
+      const y = (R + r * Math.cos(v)) * Math.sin(u);
+      const z = r * Math.sin(v);
       return { x, y, z };
     }
 
-    // 3D -> 2D projection with rotation
-    function project(x, y, z, time) {
-      // Auto-rotation + mouse influence
-      const rotY = time * 0.15 + mx * 0.4;
-      const rotX = 0.45 + my * 0.3;
+    // Outward normal at (u, v)
+    function torusNormal(u, v) {
+      const nx = Math.cos(v) * Math.cos(u);
+      const ny = Math.cos(v) * Math.sin(u);
+      const nz = Math.sin(v);
+      return { x: nx, y: ny, z: nz };
+    }
 
-      // Rotate around Y
+    // Deformed torus point: rest + scalar * normal
+    function torusDeformed(i, j) {
+      const u = (i / NU) * Math.PI * 2;
+      const v = (j / NV) * Math.PI * 2;
+      const p = torusRest(u, v);
+      const n = torusNormal(u, v);
+      const d = displace[i][j];
+      return { x: p.x + n.x * d, y: p.y + n.y * d, z: p.z + n.z * d };
+    }
+
+    function projectPoint(x, y, z, rotY, rotX) {
       const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
       const x1 = x * cosY + z * sinY;
       const z1 = -x * sinY + z * cosY;
 
-      // Rotate around X
       const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
       const y1 = y * cosX - z1 * sinX;
       const z2 = y * sinX + z1 * cosX;
 
-      return {
-        sx: W / 2 + x1 * SCALE,
-        sy: H / 2 + y1 * SCALE,
-        depth: z2
-      };
+      return { sx: W / 2 + x1 * SCALE, sy: H / 2 + y1 * SCALE, depth: z2 };
     }
+
+    // Find closest grid vertex to screen coords
+    function findClosest(sx, sy, projected) {
+      let bestDist = Infinity, bi = -1, bj = -1;
+      for (let i = 0; i <= NU; i += 2) {
+        for (let j = 0; j <= NV; j += 2) {
+          const p = projected[i][j];
+          const dx = p.sx - sx, dy = p.sy - sy;
+          const d = dx * dx + dy * dy;
+          if (d < bestDist) { bestDist = d; bi = i; bj = j; }
+        }
+      }
+      const iMin = Math.max(0, bi - 2), iMax = Math.min(NU, bi + 2);
+      const jMin = Math.max(0, bj - 2), jMax = Math.min(NV, bj + 2);
+      for (let i = iMin; i <= iMax; i++) {
+        for (let j = jMin; j <= jMax; j++) {
+          const p = projected[i][j];
+          const dx = p.sx - sx, dy = p.sy - sy;
+          const d = dx * dx + dy * dy;
+          if (d < bestDist) { bestDist = d; bi = i; bj = j; }
+        }
+      }
+      return { i: bi, j: bj, dist: Math.sqrt(bestDist) };
+    }
+
+    // Toroidal distance in grid indices
+    function gridDist(i1, j1, i2, j2) {
+      let di = Math.abs(i1 - i2);
+      if (di > NU / 2) di = NU - di;
+      let dj = Math.abs(j1 - j2);
+      if (dj > NV / 2) dj = NV - dj;
+      return Math.sqrt(di * di + dj * dj);
+    }
+
+    // Project the screen drag onto the normal of the grabbed point (in screen space)
+    function normalScreenDir(i, j, rotY, rotX) {
+      const u = (i / NU) * Math.PI * 2;
+      const v = (j / NV) * Math.PI * 2;
+      const n = torusNormal(u, v);
+      // Project normal vector to screen
+      const p0 = projectPoint(0, 0, 0, rotY, rotX);
+      const p1 = projectPoint(n.x, n.y, n.z, rotY, rotX);
+      const dx = p1.sx - p0.sx;
+      const dy = p1.sy - p0.sy;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      if (len < 0.001) return { x: 0, y: -1 };
+      return { x: dx / len, y: dy / len };
+    }
+
+    let lastProjected = null;
+
+    canvas.addEventListener('mousedown', function (e) {
+      if (!lastProjected) return;
+      const hit = findClosest(e.clientX, e.clientY, lastProjected);
+      if (hit.dist < 80) {
+        dragging = true;
+        grabI = hit.i;
+        grabJ = hit.j;
+        grabScreenX = e.clientX;
+        grabScreenY = e.clientY;
+        canvas.style.cursor = 'grabbing';
+      }
+    });
+
+    window.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      const rot = { rotY: autoRotY, rotX: rotXBase };
+      const nDir = normalScreenDir(grabI, grabJ, rot.rotY, rot.rotX);
+
+      // Project mouse displacement onto normal screen direction
+      const dsx = e.clientX - grabScreenX;
+      const dsy = e.clientY - grabScreenY;
+      const scalar = (dsx * nDir.x + dsy * nDir.y) / SCALE * PULL_STRENGTH;
+
+      // Reset all displacements then apply new ones
+      for (let i = 0; i <= NU; i++) {
+        for (let j = 0; j <= NV; j++) {
+          const gd = gridDist(i, j, grabI, grabJ);
+          const weight = Math.exp(-(gd * gd) / (FALLOFF_RADIUS * FALLOFF_RADIUS / 3));
+          displace[i][j] = scalar * weight;
+        }
+      }
+    });
+
+    window.addEventListener('mouseup', function () {
+      dragging = false;
+      grabI = -1;
+      grabJ = -1;
+      canvas.style.cursor = 'default';
+    });
 
     function draw(time) {
       ctx.clearRect(0, 0, W, H);
 
-      const points = [];
+      if (!dragging) {
+        autoRotY += 0.003;
+      }
 
-      // Compute all torus points
-      for (let i = 0; i <= NU; i++) {
-        points[i] = [];
-        const u = (i / NU) * Math.PI * 2;
-        for (let j = 0; j <= NV; j++) {
-          const v = (j / NV) * Math.PI * 2;
-          const p = torusPoint(u, v, time);
-          points[i][j] = project(p.x, p.y, p.z, time);
+      // Spring back
+      if (!dragging) {
+        for (let i = 0; i <= NU; i++) {
+          for (let j = 0; j <= NV; j++) {
+            displace[i][j] *= (1 - SPRING);
+          }
         }
       }
 
-      // Draw wireframe lines
+      const rotY = autoRotY;
+      const rotX = rotXBase;
+      const points = [];
+
+      for (let i = 0; i <= NU; i++) {
+        points[i] = [];
+        for (let j = 0; j <= NV; j++) {
+          const p = torusDeformed(i, j);
+          points[i][j] = projectPoint(p.x, p.y, p.z, rotY, rotX);
+        }
+      }
+
+      lastProjected = points;
+
+      // Draw wireframe
       for (let i = 0; i <= NU; i++) {
         for (let j = 0; j < NV; j++) {
-          const a = points[i][j];
-          const b = points[i][j + 1];
-          drawEdge(a, b);
+          drawEdge(points[i][j], points[i][j + 1]);
         }
       }
       for (let j = 0; j <= NV; j++) {
         for (let i = 0; i < NU; i++) {
-          const a = points[i][j];
-          const b = points[i + 1][j];
-          drawEdge(a, b);
+          drawEdge(points[i][j], points[i + 1][j]);
         }
       }
 
