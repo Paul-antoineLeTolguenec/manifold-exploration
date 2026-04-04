@@ -7,309 +7,343 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #070b14;
-      --bg2:       #0d1220;
-      --cyan:      #00d4ff;
-      --cyan-dim:  rgba(0, 212, 255, 0.12);
-      --cyan-glow: rgba(0, 212, 255, 0.25);
-      --text:      #e2e8f0;
-      --text-muted:#7a8fa6;
-      --border:    rgba(0, 212, 255, 0.12);
-      --font:      'Inter', sans-serif;
-      --mono:      'JetBrains Mono', monospace;
-    }
-
-    html, body {
-      height: 100%;
-      overflow: hidden;
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-    }
-
-    .overlay {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      text-align: center;
-      pointer-events: none;
-    }
-
-    .overlay h1 {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-
-    .overlay h1 span {
-      color: var(--cyan);
-    }
-
-    .overlay p {
-      font-size: clamp(0.95rem, 2vw, 1.15rem);
-      color: var(--text-muted);
-      max-width: 520px;
-      line-height: 1.6;
-    }
-
-    .overlay .subtitle {
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      color: var(--cyan);
-      opacity: 0.7;
-      margin-bottom: 1.5rem;
-      letter-spacing: 0.05em;
-    }
-  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-  <canvas id="surface"></canvas>
 
-  <div class="overlay">
-    <p class="subtitle">blog post</p>
-    <h1>Manifold <span>Exploration</span></h1>
-    <p>Smooth manifolds, Christoffel symbols, geodesics, and the geometry of curved spaces.</p>
-  </div>
+  <!-- ═══════════════════ HERO ═══════════════════ -->
+  <section class="hero" id="top">
+    <canvas id="surface"></canvas>
+    <div class="hero-overlay">
+      <p class="subtitle">differential geometry blog</p>
+      <h1>Manifold <span>Exploration</span></h1>
+      <p>From smooth manifolds to latent space geometry &mdash; an interactive journey through the mathematics of curved spaces.</p>
+    </div>
+    <div class="scroll-hint">&#8595; scroll to explore</div>
+  </section>
 
+  <!-- ═══════════════════ NAV ═══════════════════ -->
+  <nav class="nav" id="nav">
+    <a class="nav-brand" href="#top">M/E</a>
+    <ul class="nav-links">
+      <li><a href="#ch1">Smooth Manifolds</a></li>
+      <li><a href="#ch2">Tangent Spaces</a></li>
+      <li><a href="#ch3">Connections</a></li>
+      <li><a href="#ch4">Geodesics</a></li>
+      <li><a href="#ch5">Curvature</a></li>
+      <li><a href="#ch6">Riemannian Metrics</a></li>
+      <li><a href="#ch7">Projection</a></li>
+      <li><a href="#ch8">Manifold Learning</a></li>
+      <li><a href="#ch9">Latent Geometry</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══════════════════ CHAPTERS ═══════════════════ -->
+
+  <!-- Chapter 1 -->
+  <section class="chapter" id="ch1">
+    <div class="chapter-number">01</div>
+    <h2>Smooth <span>Manifolds</span></h2>
+    <p class="chapter-intro">
+      A manifold is a space that locally resembles Euclidean space. We formalize this with charts, atlases, and smooth transition maps.
+    </p>
+    <div class="chapter-body">
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>A <strong>topological manifold</strong> of dimension <em>n</em> is a second-countable Hausdorff space where every point has a neighborhood homeomorphic to an open subset of <span class="katex-inline">\mathbb{R}^n</span>.</p>
+      </div>
+
+      <h3>Charts and Atlases</h3>
+      <p>A chart <span class="katex-inline">(U, \varphi)</span> maps an open set <span class="katex-inline">U \subset M</span> to <span class="katex-inline">\mathbb{R}^n</span>. An atlas is a collection of charts covering the entire manifold.</p>
+
+      <div class="math-block">
+        <span class="katex-display">\varphi_\beta \circ \varphi_\alpha^{-1} : \varphi_\alpha(U_\alpha \cap U_\beta) \to \varphi_\beta(U_\alpha \cap U_\beta)</span>
+      </div>
+
+      <h3>Smooth Structure</h3>
+      <p>When all transition maps are smooth (<span class="katex-inline">C^\infty</span>), the atlas defines a smooth structure, turning a topological manifold into a <strong>smooth manifold</strong>.</p>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: chart overlaps on a sphere ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 2 -->
+  <section class="chapter" id="ch2">
+    <div class="chapter-number">02</div>
+    <h2>Tangent <span>Spaces</span></h2>
+    <p class="chapter-intro">
+      At each point of a manifold, the tangent space captures all possible directions of movement &mdash; a local linear approximation to the curved space.
+    </p>
+    <div class="chapter-body">
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>The <strong>tangent space</strong> <span class="katex-inline">T_pM</span> at a point <span class="katex-inline">p \in M</span> is the vector space of derivations on germs of smooth functions at <span class="katex-inline">p</span>.</p>
+      </div>
+
+      <h3>Tangent Vectors as Derivations</h3>
+      <p>A tangent vector <span class="katex-inline">v \in T_pM</span> acts on smooth functions <span class="katex-inline">f: M \to \mathbb{R}</span> via directional derivatives.</p>
+
+      <div class="math-block">
+        <span class="katex-display">v(f) = \sum_{i=1}^n v^i \frac{\partial (f \circ \varphi^{-1})}{\partial x^i}\bigg|_{\varphi(p)}</span>
+      </div>
+
+      <h3>The Tangent Bundle</h3>
+      <p>The disjoint union of all tangent spaces <span class="katex-inline">TM = \bigsqcup_{p \in M} T_pM</span> forms the tangent bundle, itself a smooth manifold of dimension <span class="katex-inline">2n</span>.</p>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: tangent plane on a surface ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 3 -->
+  <section class="chapter" id="ch3">
+    <div class="chapter-number">03</div>
+    <h2>Connections &amp; <span>Christoffel Symbols</span></h2>
+    <p class="chapter-intro">
+      To differentiate vector fields on a manifold, we need a connection &mdash; additional structure beyond the smooth manifold itself.
+    </p>
+    <div class="chapter-body">
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>An <strong>affine connection</strong> <span class="katex-inline">\nabla</span> assigns to vector fields <span class="katex-inline">X, Y</span> a new vector field <span class="katex-inline">\nabla_X Y</span>, satisfying linearity and the Leibniz rule.</p>
+      </div>
+
+      <h3>Christoffel Symbols</h3>
+      <p>In local coordinates, the connection is encoded by the Christoffel symbols:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\nabla_{\partial_i} \partial_j = \Gamma^k_{ij} \, \partial_k</span>
+      </div>
+
+      <h3>Covariant Derivative</h3>
+      <p>The covariant derivative of a vector field <span class="katex-inline">Y = Y^k \partial_k</span> along <span class="katex-inline">X = X^i \partial_i</span>:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\nabla_X Y = X^i \left( \frac{\partial Y^k}{\partial x^i} + \Gamma^k_{ij} Y^j \right) \partial_k</span>
+      </div>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: parallel transport on curved surface ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 4 -->
+  <section class="chapter" id="ch4">
+    <div class="chapter-number">04</div>
+    <h2><span>Geodesics</span> &amp; Parallel Transport</h2>
+    <p class="chapter-intro">
+      Geodesics are the &ldquo;straightest possible&rdquo; curves on a manifold &mdash; they parallel-transport their own tangent vector.
+    </p>
+    <div class="chapter-body">
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>A curve <span class="katex-inline">\gamma(t)</span> is a <strong>geodesic</strong> if its tangent vector is parallel-transported along itself: <span class="katex-inline">\nabla_{\dot\gamma} \dot\gamma = 0</span>.</p>
+      </div>
+
+      <h3>Geodesic Equation</h3>
+      <p>In local coordinates, the geodesic equation is a system of second-order ODEs:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\frac{d^2 x^k}{dt^2} + \Gamma^k_{ij} \frac{dx^i}{dt} \frac{dx^j}{dt} = 0</span>
+      </div>
+
+      <h3>Parallel Transport</h3>
+      <p>A vector field <span class="katex-inline">V</span> along <span class="katex-inline">\gamma</span> is parallel if <span class="katex-inline">\nabla_{\dot\gamma} V = 0</span>. This defines a linear isomorphism between tangent spaces along the curve.</p>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: geodesics on sphere and torus ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 5 -->
+  <section class="chapter" id="ch5">
+    <div class="chapter-number">05</div>
+    <h2><span>Curvature</span></h2>
+    <p class="chapter-intro">
+      Curvature measures how a manifold deviates from being flat. The Riemann tensor captures this intrinsic property completely.
+    </p>
+    <div class="chapter-body">
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>The <strong>Riemann curvature tensor</strong> measures the failure of covariant derivatives to commute:</p>
+      </div>
+
+      <div class="math-block">
+        <span class="katex-display">R(X, Y)Z = \nabla_X \nabla_Y Z - \nabla_Y \nabla_X Z - \nabla_{[X,Y]} Z</span>
+      </div>
+
+      <h3>Ricci and Scalar Curvature</h3>
+      <p>Contracting the Riemann tensor yields the Ricci tensor <span class="katex-inline">R_{ij} = R^k_{\ ikj}</span> and scalar curvature <span class="katex-inline">R = g^{ij}R_{ij}</span>.</p>
+
+      <h3>Sectional Curvature</h3>
+      <p>For a 2-plane <span class="katex-inline">\sigma = \text{span}(X, Y)</span> in <span class="katex-inline">T_pM</span>:</p>
+
+      <div class="math-block">
+        <span class="katex-display">K(\sigma) = \frac{\langle R(X, Y)Y, X \rangle}{\langle X, X\rangle\langle Y, Y\rangle - \langle X, Y\rangle^2}</span>
+      </div>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: Gaussian curvature heatmap on surfaces ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 6 -->
+  <section class="chapter" id="ch6">
+    <div class="chapter-number">06</div>
+    <h2>Riemannian <span>Metrics</span></h2>
+    <p class="chapter-intro">
+      A Riemannian metric turns a smooth manifold into a geometric space where we can measure lengths, angles, and volumes.
+    </p>
+    <div class="chapter-body">
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>A <strong>Riemannian metric</strong> <span class="katex-inline">g</span> is a smooth assignment of an inner product <span class="katex-inline">g_p: T_pM \times T_pM \to \mathbb{R}</span> to each tangent space.</p>
+      </div>
+
+      <h3>Length and Distance</h3>
+      <p>The length of a curve <span class="katex-inline">\gamma: [a, b] \to M</span> and the geodesic distance:</p>
+
+      <div class="math-block">
+        <span class="katex-display">L(\gamma) = \int_a^b \sqrt{g_{\gamma(t)}(\dot\gamma(t), \dot\gamma(t))} \, dt</span>
+      </div>
+
+      <h3>Levi-Civita Connection</h3>
+      <p>Every Riemannian manifold has a unique torsion-free, metric-compatible connection. Its Christoffel symbols are determined entirely by the metric:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\Gamma^k_{ij} = \frac{1}{2} g^{kl} \left( \frac{\partial g_{jl}}{\partial x^i} + \frac{\partial g_{il}}{\partial x^j} - \frac{\partial g_{ij}}{\partial x^l} \right)</span>
+      </div>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: metric distortion visualization ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 7 -->
+  <section class="chapter" id="ch7">
+    <div class="chapter-number">07</div>
+    <h2>Projection onto <span>Manifolds</span></h2>
+    <p class="chapter-intro">
+      Given a point in ambient space, finding the closest point on a manifold is fundamental for optimization, statistics, and ML.
+    </p>
+    <div class="chapter-body">
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>The <strong>projection map</strong> <span class="katex-inline">\pi: U \to M</span> sends each point in a tubular neighborhood to its nearest point on <span class="katex-inline">M</span>.</p>
+      </div>
+
+      <h3>Normal Bundle and Tubular Neighborhoods</h3>
+      <p>For an embedded submanifold, the normal bundle provides directions perpendicular to the manifold. A tubular neighborhood is a diffeomorphic image of a neighborhood of the zero section.</p>
+
+      <h3>Exponential Map</h3>
+      <p>The exponential map <span class="katex-inline">\exp_p: T_pM \to M</span> sends tangent vectors to the manifold along geodesics:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\exp_p(v) = \gamma_v(1) \quad \text{where} \quad \gamma_v(0) = p, \; \dot\gamma_v(0) = v</span>
+      </div>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: projection onto sphere / torus ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 8 -->
+  <section class="chapter" id="ch8">
+    <div class="chapter-number">08</div>
+    <h2>Manifold <span>Learning</span></h2>
+    <p class="chapter-intro">
+      When data lies on or near a low-dimensional manifold in high-dimensional space, manifold learning algorithms recover that structure.
+    </p>
+    <div class="chapter-body">
+      <h3>The Manifold Hypothesis</h3>
+      <p>High-dimensional data often concentrates near a low-dimensional manifold. This assumption underpins dimensionality reduction and modern representation learning.</p>
+
+      <h3>Classical Algorithms</h3>
+      <p>ISOMAP approximates geodesic distances via graph shortest paths. Locally Linear Embedding (LLE) preserves local linear reconstructions. Laplacian Eigenmaps use the graph Laplacian to find smooth embeddings.</p>
+
+      <h3>UMAP and t-SNE</h3>
+      <p>Modern methods optimize embeddings by matching neighborhood structures between high-dimensional and low-dimensional representations.</p>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: dimensionality reduction on point clouds ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 9 -->
+  <section class="chapter" id="ch9">
+    <div class="chapter-number">09</div>
+    <h2>Latent Space <span>Geometry</span></h2>
+    <p class="chapter-intro">
+      Neural networks learn latent spaces that carry rich geometric structure. Understanding this geometry connects differential geometry to deep learning.
+    </p>
+    <div class="chapter-body">
+      <h3>Pullback Metrics in Autoencoders</h3>
+      <p>A decoder <span class="katex-inline">f: \mathcal{Z} \to \mathcal{X}</span> induces a Riemannian metric on latent space via the Jacobian:</p>
+
+      <div class="math-block">
+        <span class="katex-display">g_{ij}(z) = J(z)^T J(z), \quad J(z) = \frac{\partial f}{\partial z}</span>
+      </div>
+
+      <h3>Geodesics in Latent Space</h3>
+      <p>Under the pullback metric, straight-line interpolations in <span class="katex-inline">\mathcal{Z}</span> are replaced by geodesics that respect the learned geometry &mdash; producing smoother and more meaningful transitions.</p>
+
+      <h3>Connections to Representation Learning</h3>
+      <p>Disentangled representations correspond to coordinate systems where the metric tensor is diagonal. The Fisher information metric on statistical manifolds bridges information geometry with neural network training.</p>
+
+      <div class="viz-container">
+        <span class="viz-placeholder">[ interactive: latent space geodesics vs. linear interpolation ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ FOOTER ═══════════════════ -->
+  <footer class="footer">
+    <p>Manifold Exploration &mdash; <a href="https://github.com/Paul-antoineLeTolguenec/manifold-exploration">source</a></p>
+  </footer>
+
+  <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="assets/js/torus.js"></script>
   <script>
+  // Render KaTeX after load
+  window.addEventListener('DOMContentLoaded', function () {
+    function renderMath() {
+      document.querySelectorAll('.katex-inline').forEach(function (el) {
+        katex.render(el.textContent, el, { throwOnError: false, displayMode: false });
+      });
+      document.querySelectorAll('.katex-display').forEach(function (el) {
+        katex.render(el.textContent, el, { throwOnError: false, displayMode: true });
+      });
+    }
+    // Wait for KaTeX script to load
+    if (window.katex) { renderMath(); }
+    else { document.querySelector('script[src*="katex.min.js"]').addEventListener('load', renderMath); }
+  });
+
+  // Active nav link on scroll
   (function () {
-    const canvas = document.getElementById('surface');
-    const ctx = canvas.getContext('2d');
-
-    let W, H;
-
-    // Torus parameters
-    const R = 8;
-    const r = 3.2;
-    const NU = 60;
-    const NV = 60;
-    const SCALE = 28;
-    const SPRING = 0.04;
-    const PULL_STRENGTH = 5.0;
-    const FALLOFF_RADIUS = 20; // in grid cells
-
-    // Per-vertex scalar displacement along normal
-    const displace = [];
-    for (let i = 0; i <= NU; i++) {
-      displace[i] = new Float32Array(NV + 1);
-    }
-
-    let autoRotY = 0;
-    const rotXBase = 0.45;
-
-    let dragging = false;
-    let grabI = -1, grabJ = -1;
-    let grabScreenX = 0, grabScreenY = 0;
-
-    function resize() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // Torus rest position
-    function torusRest(u, v) {
-      const x = (R + r * Math.cos(v)) * Math.cos(u);
-      const y = (R + r * Math.cos(v)) * Math.sin(u);
-      const z = r * Math.sin(v);
-      return { x, y, z };
-    }
-
-    // Outward normal at (u, v)
-    function torusNormal(u, v) {
-      const nx = Math.cos(v) * Math.cos(u);
-      const ny = Math.cos(v) * Math.sin(u);
-      const nz = Math.sin(v);
-      return { x: nx, y: ny, z: nz };
-    }
-
-    // Deformed torus point: rest + scalar * normal
-    function torusDeformed(i, j) {
-      const u = (i / NU) * Math.PI * 2;
-      const v = (j / NV) * Math.PI * 2;
-      const p = torusRest(u, v);
-      const n = torusNormal(u, v);
-      const d = displace[i][j];
-      return { x: p.x + n.x * d, y: p.y + n.y * d, z: p.z + n.z * d };
-    }
-
-    function projectPoint(x, y, z, rotY, rotX) {
-      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-      const x1 = x * cosY + z * sinY;
-      const z1 = -x * sinY + z * cosY;
-
-      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
-      const y1 = y * cosX - z1 * sinX;
-      const z2 = y * sinX + z1 * cosX;
-
-      return { sx: W / 2 + x1 * SCALE, sy: H / 2 + y1 * SCALE, depth: z2 };
-    }
-
-    // Find closest grid vertex to screen coords
-    function findClosest(sx, sy, projected) {
-      let bestDist = Infinity, bi = -1, bj = -1;
-      for (let i = 0; i <= NU; i += 2) {
-        for (let j = 0; j <= NV; j += 2) {
-          const p = projected[i][j];
-          const dx = p.sx - sx, dy = p.sy - sy;
-          const d = dx * dx + dy * dy;
-          if (d < bestDist) { bestDist = d; bi = i; bj = j; }
+    const sections = document.querySelectorAll('.chapter');
+    const links = document.querySelectorAll('.nav-links a');
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          const active = document.querySelector('.nav-links a[href="#' + entry.target.id + '"]');
+          if (active) active.classList.add('active');
         }
-      }
-      const iMin = Math.max(0, bi - 2), iMax = Math.min(NU, bi + 2);
-      const jMin = Math.max(0, bj - 2), jMax = Math.min(NV, bj + 2);
-      for (let i = iMin; i <= iMax; i++) {
-        for (let j = jMin; j <= jMax; j++) {
-          const p = projected[i][j];
-          const dx = p.sx - sx, dy = p.sy - sy;
-          const d = dx * dx + dy * dy;
-          if (d < bestDist) { bestDist = d; bi = i; bj = j; }
-        }
-      }
-      return { i: bi, j: bj, dist: Math.sqrt(bestDist) };
-    }
-
-    // Toroidal distance in grid indices
-    function gridDist(i1, j1, i2, j2) {
-      let di = Math.abs(i1 - i2);
-      if (di > NU / 2) di = NU - di;
-      let dj = Math.abs(j1 - j2);
-      if (dj > NV / 2) dj = NV - dj;
-      return Math.sqrt(di * di + dj * dj);
-    }
-
-    // Project the screen drag onto the normal of the grabbed point (in screen space)
-    function normalScreenDir(i, j, rotY, rotX) {
-      const u = (i / NU) * Math.PI * 2;
-      const v = (j / NV) * Math.PI * 2;
-      const n = torusNormal(u, v);
-      // Project normal vector to screen
-      const p0 = projectPoint(0, 0, 0, rotY, rotX);
-      const p1 = projectPoint(n.x, n.y, n.z, rotY, rotX);
-      const dx = p1.sx - p0.sx;
-      const dy = p1.sy - p0.sy;
-      const len = Math.sqrt(dx * dx + dy * dy);
-      if (len < 0.001) return { x: 0, y: -1 };
-      return { x: dx / len, y: dy / len };
-    }
-
-    let lastProjected = null;
-
-    canvas.addEventListener('mousedown', function (e) {
-      if (!lastProjected) return;
-      const hit = findClosest(e.clientX, e.clientY, lastProjected);
-      if (hit.dist < 80) {
-        dragging = true;
-        grabI = hit.i;
-        grabJ = hit.j;
-        grabScreenX = e.clientX;
-        grabScreenY = e.clientY;
-        canvas.style.cursor = 'grabbing';
-      }
-    });
-
-    window.addEventListener('mousemove', function (e) {
-      if (!dragging) return;
-      const rot = { rotY: autoRotY, rotX: rotXBase };
-      const nDir = normalScreenDir(grabI, grabJ, rot.rotY, rot.rotX);
-
-      // Project mouse displacement onto normal screen direction
-      const dsx = e.clientX - grabScreenX;
-      const dsy = e.clientY - grabScreenY;
-      const scalar = (dsx * nDir.x + dsy * nDir.y) / SCALE * PULL_STRENGTH;
-
-      // Reset all displacements then apply new ones
-      for (let i = 0; i <= NU; i++) {
-        for (let j = 0; j <= NV; j++) {
-          const gd = gridDist(i, j, grabI, grabJ);
-          const weight = Math.exp(-(gd * gd) / (FALLOFF_RADIUS * FALLOFF_RADIUS / 3));
-          displace[i][j] = scalar * weight;
-        }
-      }
-    });
-
-    window.addEventListener('mouseup', function () {
-      dragging = false;
-      grabI = -1;
-      grabJ = -1;
-      canvas.style.cursor = 'default';
-    });
-
-    function draw(time) {
-      ctx.clearRect(0, 0, W, H);
-
-      if (!dragging) {
-        autoRotY += 0.003;
-      }
-
-      // Spring back
-      if (!dragging) {
-        for (let i = 0; i <= NU; i++) {
-          for (let j = 0; j <= NV; j++) {
-            displace[i][j] *= (1 - SPRING);
-          }
-        }
-      }
-
-      const rotY = autoRotY;
-      const rotX = rotXBase;
-      const points = [];
-
-      for (let i = 0; i <= NU; i++) {
-        points[i] = [];
-        for (let j = 0; j <= NV; j++) {
-          const p = torusDeformed(i, j);
-          points[i][j] = projectPoint(p.x, p.y, p.z, rotY, rotX);
-        }
-      }
-
-      lastProjected = points;
-
-      // Draw wireframe
-      for (let i = 0; i <= NU; i++) {
-        for (let j = 0; j < NV; j++) {
-          drawEdge(points[i][j], points[i][j + 1]);
-        }
-      }
-      for (let j = 0; j <= NV; j++) {
-        for (let i = 0; i < NU; i++) {
-          drawEdge(points[i][j], points[i + 1][j]);
-        }
-      }
-
-      requestAnimationFrame(() => draw(performance.now() / 1000));
-    }
-
-    function drawEdge(a, b) {
-      const avgDepth = (a.depth + b.depth) / 2;
-      const t = (avgDepth + r + R) / (2 * (r + R));
-      const alpha = 0.06 + 0.4 * Math.max(0, Math.min(1, t));
-      ctx.beginPath();
-      ctx.moveTo(a.sx, a.sy);
-      ctx.lineTo(b.sx, b.sy);
-      ctx.strokeStyle = `rgba(0, 212, 255, ${alpha})`;
-      ctx.lineWidth = 0.4 + alpha * 1.0;
-      ctx.stroke();
-    }
-
-    draw(0);
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    sections.forEach(function (s) { observer.observe(s); });
   })();
   </script>
 </body>
