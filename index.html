@@ -88,6 +88,34 @@
 
       <p>However, this parametrization <strong>fails at the poles</strong> (<span class="katex-inline">\theta = 0</span> and <span class="katex-inline">\theta = \pi</span>): all values of <span class="katex-inline">\varphi</span> map to the same point, and the Jacobian drops rank. No single coordinate system can cover all of <span class="katex-inline">S^2</span> without such degeneracies. We need a more general framework.</p>
 
+      <!-- ── Section 2b: Surfaces as Parametrizations ── -->
+      <h3>Surfaces as Parametrizations</h3>
+
+      <p>Before introducing the abstract machinery, let us make precise what we just did. We described <span class="katex-inline">S^2</span> by giving a smooth map from a region of <span class="katex-inline">\mathbb{R}^2</span> into <span class="katex-inline">\mathbb{R}^3</span>. This is the concrete notion of a <strong>parametric surface</strong>.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>A <strong>parametric surface</strong> is a smooth map <span class="katex-inline">F : U \subset \mathbb{R}^2 \to \mathbb{R}^3</span> whose Jacobian has rank 2 everywhere. The image <span class="katex-inline">F(U)</span> is the surface sitting in <span class="katex-inline">\mathbb{R}^3</span>.</p>
+      </div>
+
+      <p>For the sphere, the parametrization is exactly the map we wrote above:</p>
+
+      <div class="math-block">
+        <span class="katex-display">F(\theta, \varphi) = (\sin\theta\cos\varphi,\; \cos\theta,\; \sin\theta\sin\varphi)</span>
+      </div>
+
+      <p>The key observation is that <strong>a chart is the local inverse of a parametrization</strong>. Where <span class="katex-inline">F</span> goes from coordinates to the surface, the chart <span class="katex-inline">\psi</span> goes the other way:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\psi = F^{-1}_{\text{local}} : F(U) \subset \mathbb{R}^3 \longrightarrow U \subset \mathbb{R}^2, \quad (x,y,z) \mapsto (\theta, \varphi)</span>
+      </div>
+
+      <p>In practice, we often think in terms of the parametrization <span class="katex-inline">F</span> (going "up" from coordinates to the surface) rather than the chart <span class="katex-inline">\psi</span> (going "down" from the surface to coordinates). They carry the same information, just in opposite directions.</p>
+
+      <div class="viz-container">
+        <canvas id="ch1-param"></canvas>
+      </div>
+
       <!-- ── Section 3: Topological Manifolds ── -->
       <h3>Topological Manifolds</h3>
 

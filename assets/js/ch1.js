@@ -248,6 +248,272 @@
   })();
 
   // ============================================================
+  // Viz 2b: Surfaces as Parametrizations — F and ψ = F⁻¹
+  // ============================================================
+
+  (function () {
+    var c = initCanvas('ch1-param');
+    if (!c) return;
+    var ctx = c.ctx;
+    var canvas = c.canvas;
+
+    // Draggable point in parameter domain
+    var ptTheta = Math.PI * 0.4;
+    var ptPhi = 0.8;
+    var dragging = false;
+    var rotAngle = 0.6;
+    var rotXA = 0.3;
+
+    canvas.addEventListener('mousedown', function (e) {
+      var rect = canvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      var W = c.width(), H = c.height();
+      // Check if click is in parameter domain (left panel)
+      var domLeft = W * 0.05;
+      var domTop = H * 0.2;
+      var domW = W * 0.3;
+      var domH = H * 0.6;
+      if (mx >= domLeft && mx <= domLeft + domW && my >= domTop && my <= domTop + domH) {
+        dragging = true;
+        ptPhi = ((mx - domLeft) / domW) * 2 * Math.PI;
+        ptTheta = ((my - domTop) / domH) * Math.PI;
+      }
+    });
+
+    canvas.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      var rect = canvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      var W = c.width(), H = c.height();
+      var domLeft = W * 0.05;
+      var domTop = H * 0.2;
+      var domW = W * 0.3;
+      var domH = H * 0.6;
+      ptPhi = Math.max(0, Math.min(2 * Math.PI, ((mx - domLeft) / domW) * 2 * Math.PI));
+      ptTheta = Math.max(0.05, Math.min(Math.PI - 0.05, ((my - domTop) / domH) * Math.PI));
+    });
+
+    window.addEventListener('mouseup', function () { dragging = false; });
+
+    // Touch support
+    canvas.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      var rect = canvas.getBoundingClientRect();
+      var t = e.touches[0];
+      var mx = t.clientX - rect.left, my = t.clientY - rect.top;
+      var W = c.width(), H = c.height();
+      var domLeft = W * 0.05, domTop = H * 0.2, domW = W * 0.3, domH = H * 0.6;
+      if (mx >= domLeft && mx <= domLeft + domW && my >= domTop && my <= domTop + domH) {
+        dragging = true;
+        ptPhi = ((mx - domLeft) / domW) * 2 * Math.PI;
+        ptTheta = ((my - domTop) / domH) * Math.PI;
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', function (e) {
+      if (!dragging) return;
+      e.preventDefault();
+      var rect = canvas.getBoundingClientRect();
+      var t = e.touches[0];
+      var mx = t.clientX - rect.left, my = t.clientY - rect.top;
+      var W = c.width(), H = c.height();
+      var domLeft = W * 0.05, domTop = H * 0.2, domW = W * 0.3, domH = H * 0.6;
+      ptPhi = Math.max(0, Math.min(2 * Math.PI, ((mx - domLeft) / domW) * 2 * Math.PI));
+      ptTheta = Math.max(0.05, Math.min(Math.PI - 0.05, ((my - domTop) / domH) * Math.PI));
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', function () { dragging = false; });
+
+    function draw() {
+      requestAnimationFrame(draw);
+      var W = c.width(), H = c.height();
+      ctx.clearRect(0, 0, W, H);
+
+      // Layout
+      var domLeft = W * 0.05;
+      var domTop = H * 0.2;
+      var domW = W * 0.3;
+      var domH = H * 0.6;
+      var sphereCx = W * 0.72;
+      var sphereCy = H * 0.5;
+      var sphereR = Math.min(W * 0.2, H * 0.35);
+
+      // ── Left: parameter domain (θ, φ) rectangle ──
+      ctx.font = LABEL_FONT;
+      ctx.fillStyle = TEXT_COLOR;
+      ctx.textAlign = 'center';
+      ctx.fillText('Parameter domain U \u2282 \u211D\u00B2', domLeft + domW / 2, domTop - 12);
+
+      // Domain rectangle
+      ctx.strokeStyle = CYAN + '0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(domLeft, domTop, domW, domH);
+
+      // Grid inside domain
+      for (var i = 1; i < 6; i++) {
+        var gy = domTop + (i / 6) * domH;
+        drawLine(ctx, domLeft, gy, domLeft + domW, gy, 0.08);
+      }
+      for (var j = 1; j < 8; j++) {
+        var gx = domLeft + (j / 8) * domW;
+        drawLine(ctx, gx, domTop, gx, domTop + domH, 0.08);
+      }
+
+      // Axis labels
+      ctx.font = SMALL_FONT;
+      ctx.fillStyle = TEXT_COLOR;
+      ctx.textAlign = 'center';
+      ctx.fillText('\u03C6 \u2192', domLeft + domW / 2, domTop + domH + 18);
+      ctx.save();
+      ctx.translate(domLeft - 14, domTop + domH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('\u03B8 \u2192', 0, 0);
+      ctx.restore();
+
+      // Corner labels
+      ctx.font = SMALL_FONT;
+      ctx.fillStyle = TEXT_COLOR;
+      ctx.textAlign = 'left';
+      ctx.fillText('0', domLeft - 2, domTop + domH + 14);
+      ctx.fillText('2\u03C0', domLeft + domW - 10, domTop + domH + 14);
+      ctx.textAlign = 'right';
+      ctx.fillText('0', domLeft - 6, domTop + 5);
+      ctx.fillText('\u03C0', domLeft - 6, domTop + domH + 4);
+
+      // Highlighted point in domain
+      var ptSx = domLeft + (ptPhi / (2 * Math.PI)) * domW;
+      var ptSy = domTop + (ptTheta / Math.PI) * domH;
+      drawCircle(ctx, ptSx, ptSy, 6, 1.0, ORANGE);
+      drawCircle(ctx, ptSx, ptSy, 3, 1.0, ORANGE);
+
+      // Coordinate readout
+      ctx.font = SMALL_FONT;
+      ctx.fillStyle = ORANGE + '0.9)';
+      ctx.textAlign = 'left';
+      ctx.fillText('(\u03B8=' + ptTheta.toFixed(2) + ', \u03C6=' + ptPhi.toFixed(2) + ')', ptSx + 10, ptSy - 8);
+
+      // ── Right: sphere with mapped point ──
+      ctx.font = LABEL_FONT;
+      ctx.fillStyle = TEXT_COLOR;
+      ctx.textAlign = 'center';
+      ctx.fillText('Surface F(U) \u2282 \u211D\u00B3', sphereCx, domTop - 12);
+
+      drawSphereWireframe(ctx, sphereCx, sphereCy, sphereR, rotAngle, rotXA, 1, 16, 24, 0.2);
+
+      // Draw θ and φ curves through the point on sphere
+      // φ-curve (constant θ, varying φ) — latitude
+      var latPts = [];
+      for (var i = 0; i <= 60; i++) {
+        var phi = (i / 60) * 2 * Math.PI;
+        var p = sphereVertex(ptTheta, phi, 1);
+        p = rotateY(p, rotAngle);
+        p = rotateX(p, rotXA);
+        latPts.push(project(p, sphereCx, sphereCy, sphereR));
+      }
+      for (var i = 0; i < latPts.length - 1; i++) {
+        var a = latPts[i], b = latPts[i + 1];
+        if (a.depth > -0.2 && b.depth > -0.2) {
+          drawLine(ctx, a.sx, a.sy, b.sx, b.sy, 0.35, 1.2, CYAN);
+        } else {
+          drawLine(ctx, a.sx, a.sy, b.sx, b.sy, 0.1, 0.8, CYAN);
+        }
+      }
+
+      // θ-curve (constant φ, varying θ) — meridian
+      var merPts = [];
+      for (var i = 0; i <= 60; i++) {
+        var theta = (i / 60) * Math.PI;
+        var p = sphereVertex(theta, ptPhi, 1);
+        p = rotateY(p, rotAngle);
+        p = rotateX(p, rotXA);
+        merPts.push(project(p, sphereCx, sphereCy, sphereR));
+      }
+      for (var i = 0; i < merPts.length - 1; i++) {
+        var a = merPts[i], b = merPts[i + 1];
+        if (a.depth > -0.2 && b.depth > -0.2) {
+          drawLine(ctx, a.sx, a.sy, b.sx, b.sy, 0.35, 1.2, ORANGE);
+        } else {
+          drawLine(ctx, a.sx, a.sy, b.sx, b.sy, 0.1, 0.8, ORANGE);
+        }
+      }
+
+      // Mapped point on sphere
+      var sp = sphereVertex(ptTheta, ptPhi, 1);
+      sp = rotateY(sp, rotAngle);
+      sp = rotateX(sp, rotXA);
+      var sp2d = project(sp, sphereCx, sphereCy, sphereR);
+      drawCircle(ctx, sp2d.sx, sp2d.sy, 6, 1.0, ORANGE);
+      drawCircle(ctx, sp2d.sx, sp2d.sy, 3, 1.0, ORANGE);
+
+      // 3D coordinates readout
+      var x3 = Math.sin(ptTheta) * Math.cos(ptPhi);
+      var y3 = Math.cos(ptTheta);
+      var z3 = Math.sin(ptTheta) * Math.sin(ptPhi);
+      ctx.font = SMALL_FONT;
+      ctx.fillStyle = ORANGE + '0.9)';
+      ctx.textAlign = 'left';
+      ctx.fillText('(' + x3.toFixed(2) + ', ' + y3.toFixed(2) + ', ' + z3.toFixed(2) + ')', sp2d.sx + 10, sp2d.sy - 8);
+
+      // ── Arrows between panels ──
+      var arrowY1 = H * 0.4;
+      var arrowY2 = H * 0.6;
+      var arrowX1 = domLeft + domW + 15;
+      var arrowX2 = sphereCx - sphereR - 15;
+      var arrowMidX = (arrowX1 + arrowX2) / 2;
+
+      // F arrow (top, left to right)
+      ctx.beginPath();
+      ctx.moveTo(arrowX1, arrowY1);
+      ctx.lineTo(arrowX2, arrowY1);
+      ctx.strokeStyle = CYAN + '0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // Arrowhead
+      ctx.beginPath();
+      ctx.moveTo(arrowX2, arrowY1);
+      ctx.lineTo(arrowX2 - 8, arrowY1 - 4);
+      ctx.lineTo(arrowX2 - 8, arrowY1 + 4);
+      ctx.closePath();
+      ctx.fillStyle = CYAN + '0.6)';
+      ctx.fill();
+      // Label F
+      ctx.font = '13px "JetBrains Mono", monospace';
+      ctx.fillStyle = CYAN + '0.9)';
+      ctx.textAlign = 'center';
+      ctx.fillText('F', arrowMidX, arrowY1 - 8);
+
+      // ψ arrow (bottom, right to left)
+      ctx.beginPath();
+      ctx.moveTo(arrowX2, arrowY2);
+      ctx.lineTo(arrowX1, arrowY2);
+      ctx.strokeStyle = ORANGE + '0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // Arrowhead
+      ctx.beginPath();
+      ctx.moveTo(arrowX1, arrowY2);
+      ctx.lineTo(arrowX1 + 8, arrowY2 - 4);
+      ctx.lineTo(arrowX1 + 8, arrowY2 + 4);
+      ctx.closePath();
+      ctx.fillStyle = ORANGE + '0.6)';
+      ctx.fill();
+      // Label ψ
+      ctx.font = '13px "JetBrains Mono", monospace';
+      ctx.fillStyle = ORANGE + '0.9)';
+      ctx.textAlign = 'center';
+      ctx.fillText('\u03C8 = F\u207B\u00B9', arrowMidX, arrowY2 + 18);
+
+      // Drag hint
+      ctx.font = SMALL_FONT;
+      ctx.fillStyle = TEXT_COLOR;
+      ctx.textAlign = 'center';
+      ctx.fillText('drag in the parameter domain', W / 2, H - 10);
+    }
+
+    draw();
+  })();
+
+  // ============================================================
   // Viz 2: Topological Manifold Properties — 3 tabs
   // ============================================================
 
