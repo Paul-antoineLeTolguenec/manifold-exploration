@@ -308,4 +308,317 @@
 
     draw();
   })();
+
+  // ============================================================
+  // Viz 2: Tangent vector as derivation — v(f) on S²
+  // ============================================================
+  //
+  // Shows S² with level curves of f = z (altitude = cosθ).
+  // A draggable vector v at point p. v(f) displayed in real-time.
+  // The gradient ∇f is also shown projected onto T_pS² for reference.
+
+  (function () {
+    var c = initCanvas('ch2-derivation');
+    if (!c) return;
+    var ctx = c.ctx;
+    var canvas = c.canvas;
+    var rotAngle = 0.5;
+    var rotXA = 0.3;
+    var pointTheta = Math.PI * 0.4;
+    var pointPhi = 0.5;
+    var velAngle = 0.3; // angle of v in tangent plane (0 = ∂θ, π/2 = ∂φ direction)
+    var dragging = null; // 'point' or 'dir'
+
+    // Current function index
+    var funcIdx = 0;
+    var funcNames = ['f = cos θ  (altitude)', 'f = sin θ cos φ  (x-coord)', 'f = sin θ sin φ  (y-coord)'];
+    var funcShort = ['f = z', 'f = x', 'f = y'];
+
+    // Evaluate f and its partial derivatives at (θ, φ)
+    function evalFunc(idx, th, ph) {
+      if (idx === 0) {
+        // f = cosθ, ∂f/∂θ = -sinθ, ∂f/∂φ = 0
+        return { val: Math.cos(th), dth: -Math.sin(th), dph: 0 };
+      } else if (idx === 1) {
+        // f = sinθ cosφ, ∂f/∂θ = cosθ cosφ, ∂f/∂φ = -sinθ sinφ
+        return { val: Math.sin(th) * Math.cos(ph), dth: Math.cos(th) * Math.cos(ph), dph: -Math.sin(th) * Math.sin(ph) };
+      } else {
+        // f = sinθ sinφ, ∂f/∂θ = cosθ sinφ, ∂f/∂φ = sinθ cosφ
+        return { val: Math.sin(th) * Math.sin(ph), dth: Math.cos(th) * Math.sin(ph), dph: Math.sin(th) * Math.cos(ph) };
+      }
+    }
+
+    // Level curves of f on sphere (draw contours at fixed f-values)
+    function drawLevelCurves(idx) {
+      var nLevels = 12;
+      var nPtsPerLevel = 120;
+      for (var l = 1; l < nLevels; l++) {
+        var fval = -1 + 2 * l / nLevels;
+        // Find points on sphere where f ≈ fval
+        ctx.beginPath();
+        var started = false;
+        var prevVisible = false;
+        for (var j = 0; j <= nPtsPerLevel; j++) {
+          var param = (j / nPtsPerLevel) * Math.PI * 2;
+          var pt = null;
+
+          if (idx === 0) {
+            // f = cosθ = fval → θ = acos(fval), φ = param
+            var th = Math.acos(Math.max(-1, Math.min(1, fval)));
+            pt = sphereVertex(th, param, 1);
+          } else if (idx === 1) {
+            // f = sinθ cosφ = fval. Parametrize: fix φ = param, solve sinθ = fval/cosφ
+            var cosP = Math.cos(param);
+            if (Math.abs(cosP) < 0.01) continue;
+            var sinTh = fval / cosP;
+            if (Math.abs(sinTh) > 1) continue;
+            var th = Math.asin(Math.max(-1, Math.min(1, sinTh)));
+            if (th < 0) th += Math.PI;
+            pt = sphereVertex(th, param, 1);
+          } else {
+            // f = sinθ sinφ = fval. Fix φ = param, solve sinθ = fval/sinφ
+            var sinP = Math.sin(param);
+            if (Math.abs(sinP) < 0.01) continue;
+            var sinTh = fval / sinP;
+            if (Math.abs(sinTh) > 1) continue;
+            var th = Math.asin(Math.max(-1, Math.min(1, sinTh)));
+            if (th < 0) th += Math.PI;
+            pt = sphereVertex(th, param, 1);
+          }
+
+          if (!pt) continue;
+          var W = c.width(), H = c.height();
+          var sCx = W * 0.5, sCy = H * 0.5;
+          var sR = Math.min(W * 0.28, H * 0.4);
+          var pr = rotateX(rotateY(pt, rotAngle), rotXA);
+          var ps = project(pr, sCx, sCy, sR);
+
+          var isVisible = pr.z > -0.05;
+          if (isVisible) {
+            if (!started || !prevVisible) {
+              ctx.moveTo(ps.sx, ps.sy);
+              started = true;
+            } else {
+              ctx.lineTo(ps.sx, ps.sy);
+            }
+          }
+          prevVisible = isVisible;
+        }
+        // Color: blue for negative f, white for zero, red/warm for positive
+        var t = (fval + 1) / 2; // 0 to 1
+        var r = Math.floor(40 + 180 * t);
+        var g = Math.floor(60 + 40 * (1 - Math.abs(fval)));
+        var b = Math.floor(220 - 180 * t);
+        ctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ', 0.25)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    // Cycle function on click (not on sphere)
+    canvas.addEventListener('dblclick', function (e) {
+      funcIdx = (funcIdx + 1) % 3;
+    });
+
+    canvas.addEventListener('mousedown', function (e) {
+      var rect = canvas.getBoundingClientRect();
+      var W = c.width(), H = c.height();
+      var sCx = W * 0.5, sCy = H * 0.5;
+      var sR = Math.min(W * 0.28, H * 0.4);
+      var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+
+      // Check direction handle
+      var startP = sphereVertex(pointTheta, pointPhi, 1);
+      var sinT = Math.sin(pointTheta) || 0.01;
+      var dTh = { x: Math.cos(pointTheta) * Math.cos(pointPhi), y: -Math.sin(pointTheta), z: Math.cos(pointTheta) * Math.sin(pointPhi) };
+      var dPh = { x: -sinT * Math.sin(pointPhi), y: 0, z: sinT * Math.cos(pointPhi) };
+      var handleLen = 0.4;
+      var hWorld = {
+        x: startP.x + (Math.cos(velAngle) * dTh.x + Math.sin(velAngle) * dPh.x / sinT) * handleLen,
+        y: startP.y + (Math.cos(velAngle) * dTh.y + Math.sin(velAngle) * dPh.y / sinT) * handleLen,
+        z: startP.z + (Math.cos(velAngle) * dTh.z + Math.sin(velAngle) * dPh.z / sinT) * handleLen
+      };
+      var hR = rotateX(rotateY(hWorld, rotAngle), rotXA);
+      var hS = project(hR, sCx, sCy, sR);
+      if ((mx - hS.sx) * (mx - hS.sx) + (my - hS.sy) * (my - hS.sy) < 400) {
+        dragging = 'dir';
+        return;
+      }
+
+      var hit = screenToSphere(mx, my, sCx, sCy, sR, rotAngle, rotXA);
+      if (hit) {
+        dragging = 'point';
+        pointTheta = Math.max(0.15, Math.min(Math.PI - 0.15, hit.theta));
+        pointPhi = hit.phi;
+      }
+    });
+
+    canvas.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      var rect = canvas.getBoundingClientRect();
+      var W = c.width(), H = c.height();
+      var sCx = W * 0.5, sCy = H * 0.5;
+      var sR = Math.min(W * 0.28, H * 0.4);
+
+      if (dragging === 'point') {
+        var hit = screenToSphere(e.clientX - rect.left, e.clientY - rect.top, sCx, sCy, sR, rotAngle, rotXA);
+        if (hit) {
+          pointTheta = Math.max(0.15, Math.min(Math.PI - 0.15, hit.theta));
+          pointPhi = hit.phi;
+        }
+      } else if (dragging === 'dir') {
+        var startP = sphereVertex(pointTheta, pointPhi, 1);
+        var sR2 = rotateX(rotateY(startP, rotAngle), rotXA);
+        var sS = project(sR2, sCx, sCy, sR);
+        var mx = e.clientX - rect.left - sS.sx;
+        var my = e.clientY - rect.top - sS.sy;
+        var dTh = { x: Math.cos(pointTheta) * Math.cos(pointPhi), y: -Math.sin(pointTheta), z: Math.cos(pointTheta) * Math.sin(pointPhi) };
+        var sinT = Math.sin(pointTheta) || 0.01;
+        var dPh = { x: -sinT * Math.sin(pointPhi), y: 0, z: sinT * Math.cos(pointPhi) };
+        var dThR = rotateX(rotateY(dTh, rotAngle), rotXA);
+        var dPhR = rotateX(rotateY(dPh, rotAngle), rotXA);
+        var projTh = mx * dThR.x * sR + my * dThR.y * sR;
+        var projPh = mx * dPhR.x * sR + my * dPhR.y * sR;
+        velAngle = Math.atan2(projPh, projTh);
+      }
+    });
+
+    window.addEventListener('mouseup', function () { dragging = null; });
+
+    function drawArrowLocal(ctx, x1, y1, x2, y2, color, alpha, width) {
+      var dx = x2 - x1, dy = y2 - y1;
+      var len = Math.sqrt(dx * dx + dy * dy);
+      if (len < 2) return;
+      var ux = dx / len, uy = dy / len;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = color + alpha + ')';
+      ctx.lineWidth = width;
+      ctx.stroke();
+      var hl = Math.min(10, len * 0.35);
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - ux * hl - uy * hl * 0.45, y2 - uy * hl + ux * hl * 0.45);
+      ctx.lineTo(x2 - ux * hl + uy * hl * 0.45, y2 - uy * hl - ux * hl * 0.45);
+      ctx.closePath();
+      ctx.fillStyle = color + alpha + ')';
+      ctx.fill();
+    }
+
+    function draw() {
+      var W = c.width(), H = c.height();
+      ctx.clearRect(0, 0, W, H);
+      var sCx = W * 0.5, sCy = H * 0.5;
+      var sR = Math.min(W * 0.28, H * 0.4);
+
+      // Sphere wireframe
+      drawSphereWireframe(ctx, sCx, sCy, sR, rotAngle, rotXA, 1, 14, 20, 0.08);
+
+      // Level curves
+      drawLevelCurves(funcIdx);
+
+      var th = pointTheta, ph = pointPhi;
+      var sinT = Math.sin(th) || 0.01;
+      var p = sphereVertex(th, ph, 1);
+      var pR = rotateX(rotateY(p, rotAngle), rotXA);
+      var pS = project(pR, sCx, sCy, sR);
+
+      // Tangent basis in R³
+      var dTh = { x: Math.cos(th) * Math.cos(ph), y: -Math.sin(th), z: Math.cos(th) * Math.sin(ph) };
+      var dPh = { x: -sinT * Math.sin(ph), y: 0, z: sinT * Math.cos(ph) };
+
+      // Vector v in tangent plane
+      var vTh = Math.cos(velAngle);   // component along ∂/∂θ
+      var vPh = Math.sin(velAngle);   // component along ∂/∂φ (coordinate component, not normalized)
+
+      var arrowLen = 0.4;
+      var vWorld = {
+        x: dTh.x * vTh * arrowLen + dPh.x * (vPh / sinT) * arrowLen,
+        y: dTh.y * vTh * arrowLen + dPh.y * (vPh / sinT) * arrowLen,
+        z: dTh.z * vTh * arrowLen + dPh.z * (vPh / sinT) * arrowLen
+      };
+      var vEnd = { x: p.x + vWorld.x, y: p.y + vWorld.y, z: p.z + vWorld.z };
+
+      // Evaluate function and directional derivative
+      var fData = evalFunc(funcIdx, th, ph);
+      var vf = vTh * fData.dth + vPh * fData.dph;
+
+      // Gradient of f projected onto tangent plane (∇f)^i = g^{ij} ∂f/∂x^j
+      // g^θθ = 1, g^φφ = 1/sin²θ
+      var gradTh = fData.dth;        // g^θθ · ∂f/∂θ
+      var gradPh = fData.dph / (sinT * sinT);  // g^φφ · ∂f/∂φ
+      var gradWorld = {
+        x: dTh.x * gradTh * arrowLen + dPh.x * (gradPh / sinT) * arrowLen,
+        y: dTh.y * gradTh * arrowLen + dPh.y * (gradPh / sinT) * arrowLen,
+        z: dTh.z * gradTh * arrowLen + dPh.z * (gradPh / sinT) * arrowLen
+      };
+      var gradEnd = { x: p.x + gradWorld.x, y: p.y + gradWorld.y, z: p.z + gradWorld.z };
+
+      if (pS.depth > -0.5) {
+        // Draw gradient vector (dim)
+        var geR = rotateX(rotateY(gradEnd, rotAngle), rotXA);
+        var geS = project(geR, sCx, sCy, sR);
+        drawArrowLocal(ctx, pS.sx, pS.sy, geS.sx, geS.sy, 'rgba(150, 150, 150, ', '0.5', 2);
+
+        // Draw v vector (cyan)
+        var veR = rotateX(rotateY(vEnd, rotAngle), rotXA);
+        var veS = project(veR, sCx, sCy, sR);
+        drawArrowLocal(ctx, pS.sx, pS.sy, veS.sx, veS.sy, CYAN, '0.9', 2.5);
+
+        // Direction handle
+        ctx.beginPath();
+        ctx.arc(veS.sx, veS.sy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = CYAN + '0.9)';
+        ctx.fill();
+
+        // Point
+        ctx.beginPath();
+        ctx.arc(pS.sx, pS.sy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fill();
+
+        // Labels
+        ctx.font = LABEL_FONT;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = CYAN + '0.9)';
+        ctx.fillText('v', veS.sx + 10, veS.sy - 6);
+        ctx.fillStyle = 'rgba(150, 150, 150, 0.6)';
+        ctx.fillText('\u2207f', geS.sx + 10, geS.sy - 6);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillText('p', pS.sx - 14, pS.sy - 8);
+      }
+
+      // v(f) display — large, prominent
+      var vfColor = vf > 0 ? 'rgba(50, 255, 140, ' : (vf < 0 ? 'rgba(255, 80, 80, ' : 'rgba(200, 200, 200, ');
+      ctx.font = '14px "JetBrains Mono", monospace';
+      ctx.textAlign = 'left';
+      var infoX = 15, infoY = 22;
+      ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+      ctx.fillText(funcNames[funcIdx], infoX, infoY);
+      ctx.fillStyle = vfColor + '0.95)';
+      ctx.fillText('v(f) = ' + vf.toFixed(3), infoX, infoY + 20);
+      ctx.font = LABEL_FONT;
+      ctx.fillStyle = CYAN + '0.5)';
+      ctx.fillText('v = ' + vTh.toFixed(2) + ' \u2202/\u2202\u03B8 + ' + vPh.toFixed(2) + ' \u2202/\u2202\u03C6', infoX, infoY + 38);
+      ctx.fillStyle = 'rgba(150, 150, 150, 0.5)';
+      ctx.fillText('\u2207f (gradient, for reference)', infoX, infoY + 53);
+
+      // Function value at p
+      ctx.textAlign = 'right';
+      ctx.font = LABEL_FONT;
+      ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+      ctx.fillText('f(p) = ' + fData.val.toFixed(3), W - 15, infoY);
+
+      // Hint
+      ctx.font = SMALL_FONT;
+      ctx.fillStyle = 'rgba(122, 143, 166, 0.4)';
+      ctx.textAlign = 'center';
+      ctx.fillText('drag point or vector \u2022 double-click to change f', sCx, H - 12);
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  })();
 })();

@@ -18,7 +18,7 @@
     <div class="hero-overlay">
       <p class="subtitle">differential geometry blog</p>
       <h1>Manifold <span>Exploration</span></h1>
-      <p>From smooth manifolds to latent space geometry. An interactive journey through the mathematics of curved spaces.</p>
+      <p>What is a straight line on a curved surface? An interactive journey from smooth manifolds to latent space geometry.</p>
     </div>
     <div class="scroll-hint">&#8595; scroll to explore</div>
   </section>
@@ -32,7 +32,7 @@
       <li><a href="#ch3">Connections</a></li>
       <li><a href="#ch4">Geodesics</a></li>
       <li><a href="#ch5">Curvature</a></li>
-      <li><a href="#ch6">Riemannian Metrics</a></li>
+      <li><a href="#ch6">Metric Geometry</a></li>
       <li><a href="#ch7">Projection</a></li>
       <li><a href="#ch8">Manifold Learning</a></li>
       <li><a href="#ch9">Latent Geometry</a></li>
@@ -77,7 +77,7 @@
       <p><span class="katex-inline">S^2</span> is a surface: two-dimensional, smooth, and curved. The most natural way to describe it is via <strong>spherical coordinates</strong> <span class="katex-inline">(\theta, \varphi)</span>:</p>
 
       <div class="math-block">
-        <span class="katex-display">(\theta, \varphi) \mapsto (\sin\theta\cos\varphi,\; \sin\theta\sin\varphi,\; \cos\theta), \quad \theta \in [0, \pi],\; \varphi \in [0, 2\pi)</span>
+        <span class="katex-display">(\theta, \varphi) \mapsto (\sin\theta\cos\varphi,\; \cos\theta,\; \sin\theta\sin\varphi), \quad \theta \in [0, \pi],\; \varphi \in [0, 2\pi)</span>
       </div>
 
       <p>Two parameters produce a point in <span class="katex-inline">\mathbb{R}^3</span>. Near most points, this is a smooth bijection: the surface locally looks like a piece of <span class="katex-inline">\mathbb{R}^2</span>. These coordinates will be our working coordinates for concrete computations throughout the blog (metric, Christoffel symbols, geodesics).</p>
@@ -114,7 +114,7 @@
 
       <div class="definition">
         <div class="definition-label">Definition</div>
-        <p>A <strong>chart</strong> on <span class="katex-inline">M</span> is a pair <span class="katex-inline">(U_\alpha, \varphi_\alpha)</span> where <span class="katex-inline">U_\alpha \subset M</span> is open and <span class="katex-inline">\varphi_\alpha : U_\alpha \to \varphi_\alpha(U_\alpha) \subset \mathbb{R}^n</span> is a homeomorphism. An <strong>atlas</strong> is a collection of charts <span class="katex-inline">\{(U_\alpha, \varphi_\alpha)\}</span> that covers <span class="katex-inline">M</span>.</p>
+        <p>A <strong>chart</strong> on <span class="katex-inline">M</span> is a pair <span class="katex-inline">(U_\alpha, \psi_\alpha)</span> where <span class="katex-inline">U_\alpha \subset M</span> is open and <span class="katex-inline">\psi_\alpha : U_\alpha \to \psi_\alpha(U_\alpha) \subset \mathbb{R}^n</span> is a homeomorphism. An <strong>atlas</strong> is a collection of charts <span class="katex-inline">\{(U_\alpha, \psi_\alpha)\}</span> that covers <span class="katex-inline">M</span>.</p>
       </div>
 
       <p><strong>Example.</strong> The stereographic projection from the north pole <span class="katex-inline">N = (0, 0, 1)</span> maps <span class="katex-inline">S^2 \setminus \{N\}</span> to <span class="katex-inline">\mathbb{R}^2</span>:</p>
@@ -165,7 +165,7 @@
     <div class="chapter-body">
 
       <!-- ── Intuition ── -->
-      <h3>The Tangent Plane on S²</h3>
+      <h3>The Tangent Plane on S<sup>2</sup></h3>
 
       <p>At a point <span class="katex-inline">p \in S^2</span>, imagine all curves passing through <span class="katex-inline">p</span>. Their velocity vectors at <span class="katex-inline">p</span> span a plane tangent to the sphere. This plane is the <strong>tangent space</strong> <span class="katex-inline">T_pS^2</span>.</p>
 
@@ -186,26 +186,37 @@
 
       <p>On <span class="katex-inline">\mathbb{R}^n</span>, a vector <span class="katex-inline">v</span> is a "arrow". On a curved manifold, there is no ambient space to draw arrows in. Instead, we <em>define</em> a tangent vector by what it does: it computes how a function changes in a given direction.</p>
 
-      <p><strong>Concrete example on <span class="katex-inline">S^2</span>.</strong> Let <span class="katex-inline">f: S^2 \to \mathbb{R}</span> be the temperature at each point. The chart <span class="katex-inline">\varphi</span> assigns coordinates <span class="katex-inline">(\theta, \varphi)</span> to each point, so <span class="katex-inline">f \circ \varphi^{-1}(\theta, \varphi)</span> is the temperature expressed as a function of <span class="katex-inline">\theta</span> and <span class="katex-inline">\varphi</span>. A tangent vector <span class="katex-inline">v = 3\,\partial/\partial\theta + 2\,\partial/\partial\varphi</span> gives:</p>
+      <p><strong>Concrete example on <span class="katex-inline">S^2</span>.</strong> Let <span class="katex-inline">f: S^2 \to \mathbb{R}</span> be the temperature at each point. The chart <span class="katex-inline">\psi</span> assigns coordinates <span class="katex-inline">(\theta, \varphi)</span> to each point, so <span class="katex-inline">f \circ \psi^{-1}(\theta, \varphi)</span> is the temperature expressed as a function of <span class="katex-inline">\theta</span> and <span class="katex-inline">\varphi</span>. A tangent vector <span class="katex-inline">v = 3\,\partial/\partial\theta + 2\,\partial/\partial\varphi</span> gives:</p>
 
       <div class="math-block">
         <span class="katex-display">v(f) = 3\,\frac{\partial f}{\partial\theta} + 2\,\frac{\partial f}{\partial\varphi}</span>
       </div>
 
-      <p>This is the rate of change of temperature in the direction <span class="katex-inline">v</span>. The vector <span class="katex-inline">v</span> is fixed; it can act on any function <span class="katex-inline">f</span>.</p>
+      <p>This is the rate of change of temperature in the direction <span class="katex-inline">v</span>. The output <span class="katex-inline">v(f)</span> is a real number, not a vector. The vector is the operator <span class="katex-inline">v</span> itself.</p>
 
-      <p><strong>General formula.</strong> On a manifold <span class="katex-inline">M</span> of dimension <span class="katex-inline">n</span> with chart <span class="katex-inline">(U, \varphi)</span> and coordinates <span class="katex-inline">(x^1, \ldots, x^n)</span>:</p>
+      <div class="definition">
+        <div class="definition-label">Intuition</div>
+        <p><strong>Why define a vector as an operator?</strong> On <span class="katex-inline">\mathbb{R}^n</span>, a tangent vector is an "arrow" and <span class="katex-inline">v(f) = \langle v, \nabla f \rangle</span> is just the dot product with the gradient. On an abstract manifold, there is no ambient space to draw arrows in, and no global coordinate system to write components. But smooth functions <span class="katex-inline">f: M \to \mathbb{R}</span> always exist, and the directional derivative <span class="katex-inline">v(f)</span> is a coordinate-free real number. So we <em>characterize</em> a vector by its action on all functions: this is its <strong>dual representation</strong> (analogous to the Riesz representation theorem in functional analysis).</p>
+        <p>This characterization is faithful: a linear map <span class="katex-inline">v: C^\infty(M) \to \mathbb{R}</span> is a tangent vector if and only if it satisfies the <strong>Leibniz rule</strong>: <span class="katex-inline">v(fg) = v(f)\,g(p) + f(p)\,v(g)</span>. This condition forces <span class="katex-inline">v</span> to be local and finite-dimensional: the space of all such operators at <span class="katex-inline">p</span> is isomorphic to <span class="katex-inline">\mathbb{R}^n</span>. Two different vectors always disagree on at least one function, and every Leibniz-compatible operator corresponds to exactly one geometric direction. The correspondence is a bijection, not merely an encoding.</p>
+        <p><strong>Example.</strong> On <span class="katex-inline">S^2</span>, take the coordinate functions <span class="katex-inline">f_1 = \theta</span> and <span class="katex-inline">f_2 = \varphi</span>. Then <span class="katex-inline">v(f_1) = 3</span> and <span class="katex-inline">v(f_2) = 2</span> recover the components of <span class="katex-inline">v = 3\,\partial/\partial\theta + 2\,\partial/\partial\varphi</span>. In a different chart, the components change, but the operator <span class="katex-inline">v</span> and all its outputs <span class="katex-inline">v(f)</span> remain the same.</p>
+      </div>
+
+      <div class="viz-container">
+        <canvas id="ch2-derivation"></canvas>
+      </div>
+
+      <p><strong>General formula.</strong> On a manifold <span class="katex-inline">M</span> of dimension <span class="katex-inline">n</span> with chart <span class="katex-inline">(U, \psi)</span> and coordinates <span class="katex-inline">(x^1, \ldots, x^n)</span>:</p>
 
       <div class="definition">
         <div class="definition-label">Definition</div>
-        <p>The <strong>tangent space</strong> <span class="katex-inline">T_pM</span> at <span class="katex-inline">p \in M</span> is the vector space of derivations at <span class="katex-inline">p</span>. A tangent vector <span class="katex-inline">v \in T_pM</span> acts on any smooth function <span class="katex-inline">f: M \to \mathbb{R}</span> by:</p>
+        <p>The <strong>tangent space</strong> <span class="katex-inline">T_pM</span> at <span class="katex-inline">p \in M</span> is the vector space of derivations at <span class="katex-inline">p</span>: linear maps <span class="katex-inline">v: C^\infty(M) \to \mathbb{R}</span> satisfying the Leibniz rule. A tangent vector <span class="katex-inline">v \in T_pM</span> acts on any smooth function <span class="katex-inline">f: M \to \mathbb{R}</span> by:</p>
       </div>
 
       <div class="math-block">
-        <span class="katex-display">v(f) = \sum_{i=1}^n v^i \frac{\partial (f \circ \varphi^{-1})}{\partial x^i}\bigg|_{\varphi(p)}</span>
+        <span class="katex-display">v(f) = \sum_{i=1}^n v^i \frac{\partial (f \circ \psi^{-1})}{\partial x^i}\bigg|_{\psi(p)}</span>
       </div>
 
-      <p>Here <span class="katex-inline">f \circ \varphi^{-1}: \mathbb{R}^n \to \mathbb{R}</span> is <span class="katex-inline">f</span> rewritten in local coordinates (so that we can take ordinary partial derivatives), and <span class="katex-inline">(v^1, \ldots, v^n)</span> are the components of <span class="katex-inline">v</span> in the coordinate basis <span class="katex-inline">\{\partial/\partial x^i\}</span>. This action of a vector on functions will be the building block for the <strong>covariant derivative</strong> in Chapter 3, where we will need to differentiate vector fields along directions on <span class="katex-inline">M</span>.</p>
+      <p>Here <span class="katex-inline">f \circ \psi^{-1}: \mathbb{R}^n \to \mathbb{R}</span> is <span class="katex-inline">f</span> rewritten in local coordinates (so that we can take ordinary partial derivatives), and <span class="katex-inline">(v^1, \ldots, v^n)</span> are the components of <span class="katex-inline">v</span> in the coordinate basis <span class="katex-inline">\{\partial/\partial x^i\}</span>. This action of a vector on functions will be the building block for the <strong>covariant derivative</strong> in Chapter 3, where we will need to differentiate vector fields along directions on <span class="katex-inline">M</span>.</p>
 
       <!-- ── Tangent bundle ── -->
       <h3>The Tangent Bundle</h3>
@@ -228,6 +239,13 @@
       How do we differentiate a vector field on a curved surface?
     </p>
     <div class="chapter-body">
+
+      <div class="definition">
+        <div class="definition-label">Notation (Einstein summation convention)</div>
+        <p>From this chapter onward, we use the <strong>Einstein summation convention</strong>: when an index appears once as a superscript and once as a subscript in the same expression, a sum over that index is implied. For example, on <span class="katex-inline">S^2</span> with basis vectors <span class="katex-inline">e_1 = e_\theta</span>, <span class="katex-inline">e_2 = e_\varphi</span>:</p>
+        <p style="margin-top: 0.5rem; margin-bottom: 0;"><span class="katex-inline">v^i\, e_i = v^1\, e_1 + v^2\, e_2 = v^\theta\, e_\theta + v^\varphi\, e_\varphi</span></p>
+        <p>The repeated index <span class="katex-inline">i</span> is a <strong>dummy index</strong> (summed over); non-repeated indices are <strong>free</strong> (they label the components of the result). This compact notation avoids writing explicit <span class="katex-inline">\sum</span> signs in the tensor formulas that follow.</p>
+      </div>
 
       <!-- ── The problem ── -->
       <h3>Differentiating e_θ and e_φ</h3>
@@ -253,13 +271,29 @@
 
       <p>Each result is itself a tangent vector, so it can be expressed in the basis <span class="katex-inline">\{e_\theta, e_\varphi\}</span>. The coefficients of this expansion are the <strong>Christoffel symbols</strong>.</p>
 
-      <!-- ── Christoffel symbols ── -->
-      <h3>Christoffel Symbols</h3>
+      <!-- ── The round metric ── -->
+      <h3>The Round Metric on S²</h3>
+
+      <p>To compute the covariant derivative from a formula (rather than by projecting in <span class="katex-inline">\mathbb{R}^3</span>), we need the <strong>metric</strong>: the inner product on each tangent space. For <span class="katex-inline">S^2</span> with spherical coordinates <span class="katex-inline">(\theta, \varphi)</span>, the metric components <span class="katex-inline">g_{ij} = \langle e_i, e_j \rangle</span> are:</p>
 
       <div class="definition">
-        <div class="definition-label">Notation (Einstein convention)</div>
-        <p>When an index appears once as a superscript and once as a subscript, a sum over that index is implied. For instance, <span class="katex-inline">\Gamma^k_{ij}\, e_k</span> means <span class="katex-inline">\sum_k \Gamma^k_{ij}\, e_k</span>. We use this convention throughout.</p>
+        <div class="definition-label">Definition</div>
+        <p>A <strong>Riemannian metric</strong> <span class="katex-inline">g</span> on a manifold <span class="katex-inline">M</span> is a smooth assignment of an inner product <span class="katex-inline">g_p: T_pM \times T_pM \to \mathbb{R}</span> to each tangent space. It allows us to measure lengths, angles, and volumes on <span class="katex-inline">M</span>.</p>
       </div>
+
+      <div class="math-block">
+        <span class="katex-display">g_{\theta\theta} = 1, \quad g_{\theta\varphi} = g_{\varphi\theta} = 0, \quad g_{\varphi\varphi} = \sin^2\theta</span>
+      </div>
+
+      <p>This says: <span class="katex-inline">e_\theta</span> is a unit vector, <span class="katex-inline">e_\varphi</span> has length <span class="katex-inline">\sin\theta</span> (it shrinks near the poles), and they are orthogonal. The line element is <span class="katex-inline">ds^2 = d\theta^2 + \sin^2\theta\, d\varphi^2</span>. These metric components will determine the Christoffel symbols below and the geodesic equation in Chapter 4.</p>
+
+      <div class="definition">
+        <div class="definition-label">Notation</div>
+        <p>The <strong>inverse metric</strong> <span class="katex-inline">g^{ij}</span> is defined by <span class="katex-inline">g^{ik}g_{kj} = \delta^i_j</span>. It allows us to "raise indices": convert a covector into a vector. On <span class="katex-inline">S^2</span>: <span class="katex-inline">g^{\theta\theta} = 1</span>, <span class="katex-inline">g^{\varphi\varphi} = 1/\sin^2\theta</span>.</p>
+      </div>
+
+      <!-- ── Christoffel symbols ── -->
+      <h3>Christoffel Symbols</h3>
 
       <div class="definition">
         <div class="definition-label">Definition</div>
@@ -285,6 +319,56 @@
 
       <p>The first term <span class="katex-inline">\partial Y^k / \partial x^i</span> is how the components of <span class="katex-inline">Y</span> change. The second term <span class="katex-inline">\Gamma^k_{ij} Y^j</span> corrects for the fact that <span class="katex-inline">e_\theta</span> and <span class="katex-inline">e_\varphi</span> themselves rotate from point to point.</p>
 
+      <button class="proof-trigger" onclick="document.getElementById('proof-covariant').classList.add('open')">
+        Proof: covariant derivative formula
+      </button>
+
+      <!-- ── Proof card (Covariant derivative) ── -->
+      <div class="proof-overlay" id="proof-covariant">
+        <div class="proof-card">
+          <button class="proof-card-close" onclick="this.closest('.proof-overlay').classList.remove('open')">&times;</button>
+          <div class="proof-card-title">Proof: Covariant Derivative Formula</div>
+
+          <h4>Setup</h4>
+          <p>We want to compute <span class="katex-inline">\nabla_X Y</span> where <span class="katex-inline">Y = Y^j\, e_j</span> is a vector field expressed in the coordinate basis. The key tools are:</p>
+          <ul style="margin: 0.5rem 0 1rem 1.5rem; color: var(--text-muted);">
+            <li>The <strong>Leibniz rule</strong>: <span class="katex-inline">\nabla_X(f\, V) = X(f)\, V + f\, \nabla_X V</span> for any function <span class="katex-inline">f</span> and vector field <span class="katex-inline">V</span>.</li>
+            <li>The <strong>linearity</strong> of <span class="katex-inline">\nabla</span> in <span class="katex-inline">X</span>: <span class="katex-inline">\nabla_{fX} V = f\, \nabla_X V</span>.</li>
+            <li>The <strong>definition</strong> of Christoffel symbols: <span class="katex-inline">\nabla_{e_i} e_j = \Gamma^k_{ij}\, e_k</span>.</li>
+          </ul>
+
+          <h4>Step 1: Apply the Leibniz rule</h4>
+          <p>Since <span class="katex-inline">Y = Y^j\, e_j</span> (sum over <span class="katex-inline">j</span>), treating each term <span class="katex-inline">Y^j\, e_j</span> as a function times a vector field:</p>
+          <div class="math-block">
+            <span class="katex-display">\nabla_X Y = \nabla_X (Y^j\, e_j) = X(Y^j)\, e_j + Y^j\, \nabla_X e_j</span>
+          </div>
+          <p>The first term is the derivative of the <em>components</em> of <span class="katex-inline">Y</span> (the basis is held fixed). The second term accounts for the <em>rotation of the basis itself</em>.</p>
+
+          <h4>Step 2: Expand X as a derivation</h4>
+          <p>The vector field <span class="katex-inline">X = X^i\, e_i</span> acts on the function <span class="katex-inline">Y^j</span> via the definition from Chapter 2:</p>
+          <div class="math-block">
+            <span class="katex-display">X(Y^j) = X^i\, \frac{\partial Y^j}{\partial x^i}</span>
+          </div>
+
+          <h4>Step 3: Use linearity in X for the second term</h4>
+          <p>Since <span class="katex-inline">\nabla</span> is linear in the subscript: <span class="katex-inline">\nabla_X e_j = \nabla_{X^i e_i} e_j = X^i\, \nabla_{e_i} e_j</span>. Now apply the definition of Christoffel symbols:</p>
+          <div class="math-block">
+            <span class="katex-display">Y^j\, \nabla_X e_j = Y^j\, X^i\, \nabla_{e_i} e_j = X^i\, Y^j\, \Gamma^k_{ij}\, e_k</span>
+          </div>
+
+          <h4>Step 4: Combine</h4>
+          <p>Putting Steps 1-3 together:</p>
+          <div class="math-block">
+            <span class="katex-display">\nabla_X Y = X^i\, \frac{\partial Y^j}{\partial x^i}\, e_j + X^i\, Y^j\, \Gamma^k_{ij}\, e_k</span>
+          </div>
+          <p>In the first term, <span class="katex-inline">j</span> is a dummy index. Rename it to <span class="katex-inline">k</span>:</p>
+          <div class="math-block">
+            <span class="katex-display">\nabla_X Y = X^i\, \frac{\partial Y^k}{\partial x^i}\, e_k + X^i\, Y^j\, \Gamma^k_{ij}\, e_k = X^i \left( \frac{\partial Y^k}{\partial x^i} + \Gamma^k_{ij}\, Y^j \right) e_k \qquad \square</span>
+          </div>
+          <p>The expression in parentheses, <span class="katex-inline">\frac{\partial Y^k}{\partial x^i} + \Gamma^k_{ij}\, Y^j</span>, is often written <span class="katex-inline">(\nabla_i Y)^k</span> or <span class="katex-inline">Y^k_{\ ;i}</span> and called the <strong>covariant components</strong> of the derivative of <span class="katex-inline">Y</span>.</p>
+        </div>
+      </div>
+
       <p>More abstractly, <span class="katex-inline">\nabla</span> is an <strong>affine connection</strong>: an operator on any smooth manifold <span class="katex-inline">M</span> that differentiates vector fields while keeping the result in <span class="katex-inline">T_pM</span>. In the next chapter, we use it to define <strong>geodesics</strong> and <strong>parallel transport</strong>.</p>
 
     </div>
@@ -295,27 +379,172 @@
     <div class="chapter-number">04</div>
     <h2><span>Geodesics</span> &amp; Parallel Transport</h2>
     <p class="chapter-intro">
-      Geodesics are the &ldquo;straightest possible&rdquo; curves on a manifold: they parallel-transport their own tangent vector.
+      What is the shortest path between two points on a curved surface? This question, older than calculus itself, leads to the calculus of variations, the Euler-Lagrange equation, and the notion of geodesic.
     </p>
     <div class="chapter-body">
-      <div class="definition">
-        <div class="definition-label">Definition</div>
-        <p>A curve <span class="katex-inline">\gamma(t)</span> is a <strong>geodesic</strong> if its tangent vector is parallel-transported along itself: <span class="katex-inline">\nabla_{\dot\gamma} \dot\gamma = 0</span>.</p>
+
+      <!-- ── Section 1: The Shortest Path Problem ── -->
+      <h3>The Shortest Path Problem</h3>
+
+      <p>On a flat plane, the shortest path between two points is a straight line. This fact is so basic that Euclid took it as an axiom. But what happens on a curved surface?</p>
+
+      <p>Navigators have known for centuries that the shortest route between two cities on Earth follows a <strong>great circle</strong>, not a straight line on the map. This practical observation hides a deep mathematical question: among all curves connecting two points on a surface, which one has the smallest length?</p>
+
+      <p>In 1696, Johann Bernoulli posed the <em>brachistochrone problem</em>: find the curve along which a bead slides fastest under gravity. This was not about shortest distance but shortest time, yet the mathematical structure is the same. Solutions came from Leibniz, Newton, l'Hôpital, and Jakob Bernoulli. Each had to optimize over an <em>infinite-dimensional</em> space of curves.</p>
+
+      <p>Leonhard Euler systematized these ideas in 1744, developing the <strong>calculus of variations</strong>: a framework for finding curves (or functions) that minimize (or make stationary) a given integral quantity. Joseph-Louis Lagrange refined the method in 1755, giving it the elegant form we use today.</p>
+
+      <div class="viz-container">
+        <canvas id="ch4-shortest"></canvas>
       </div>
 
-      <h3>Geodesic Equation</h3>
-      <p>In local coordinates, the geodesic equation is a system of second-order ODEs:</p>
+      <!-- ── Section 2: The Energy Functional ── -->
+      <h3>From Length to Energy</h3>
+
+      <p>Given a curve <span class="katex-inline">\gamma: [a, b] \to M</span> on a <strong>Riemannian manifold</strong> (a smooth manifold <span class="katex-inline">M</span> equipped with a metric <span class="katex-inline">g</span>, as introduced in Chapter 3), its <strong>length</strong> is:</p>
+
+      <div class="math-block">
+        <span class="katex-display">L(\gamma) = \int_a^b \sqrt{g_{\gamma(t)}(\dot\gamma(t), \dot\gamma(t))} \, dt</span>
+      </div>
+
+      <p>The square root makes this functional difficult to work with (it is invariant under reparametrization, which introduces degeneracies). Instead, we minimize the <strong>energy functional</strong>:</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>The <strong>energy</strong> of a curve <span class="katex-inline">\gamma: [a, b] \to M</span> is:</p>
+      </div>
+
+      <div class="math-block">
+        <span class="katex-display">E(\gamma) = \frac{1}{2} \int_a^b g_{\gamma(t)}(\dot\gamma(t), \dot\gamma(t)) \, dt</span>
+      </div>
+
+      <p>A curve that minimizes <span class="katex-inline">E</span> among all curves with the same endpoints also minimizes <span class="katex-inline">L</span> (by the Cauchy-Schwarz inequality), and it is automatically parametrized proportionally to arc length. This is why we work with energy rather than length.</p>
+
+      <!-- ── Section 3: Calculus of Variations ── -->
+      <h3>Calculus of Variations</h3>
+
+      <p>The key idea: to find the curve that makes <span class="katex-inline">E</span> stationary, we <em>perturb</em> it. Consider a smooth one-parameter family of curves <span class="katex-inline">\gamma_\varepsilon(t) = \gamma(t) + \varepsilon \, \eta(t)</span> where <span class="katex-inline">\eta</span> is a smooth vector field along <span class="katex-inline">\gamma</span> that vanishes at the endpoints: <span class="katex-inline">\eta(a) = \eta(b) = 0</span>.</p>
+
+      <p>The curve <span class="katex-inline">\gamma</span> is a critical point of <span class="katex-inline">E</span> if and only if:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\frac{d}{d\varepsilon}\bigg|_{\varepsilon=0} E(\gamma_\varepsilon) = 0 \quad \text{for all such } \eta</span>
+      </div>
+
+      <p>This is the infinite-dimensional analogue of setting the gradient to zero. The computation that turns this condition into a differential equation is the heart of the calculus of variations.</p>
+
+      <div class="viz-container">
+        <canvas id="ch4-variation"></canvas>
+      </div>
+
+      <button class="proof-trigger" onclick="document.getElementById('proof-euler-lagrange').classList.add('open')">
+        Proof: the Euler-Lagrange equation
+      </button>
+
+      <!-- ── Proof card (Euler-Lagrange) ── -->
+      <div class="proof-overlay" id="proof-euler-lagrange">
+        <div class="proof-card">
+          <button class="proof-card-close" onclick="this.closest('.proof-overlay').classList.remove('open')">&times;</button>
+          <div class="proof-card-title">Proof: Euler-Lagrange Equation</div>
+
+          <h4>Setup</h4>
+          <p>We work in local coordinates <span class="katex-inline">x^1, \dots, x^n</span>. The energy of a curve <span class="katex-inline">\gamma(t) = (x^1(t), \dots, x^n(t))</span> is:</p>
+          <div class="math-block">
+            <span class="katex-display">E[\gamma] = \frac{1}{2} \int_a^b g_{ij}(x(t))\, \dot x^i(t)\, \dot x^j(t) \, dt</span>
+          </div>
+          <p>This has the form <span class="katex-inline">\int_a^b \mathcal{L}(x, \dot x) \, dt</span> with Lagrangian <span class="katex-inline">\mathcal{L}(x, \dot x) = \tfrac{1}{2}\, g_{ij}(x)\, \dot x^i \dot x^j</span>.</p>
+
+          <h4>Variation</h4>
+          <p>Let <span class="katex-inline">x^k_\varepsilon(t) = x^k(t) + \varepsilon\, \eta^k(t)</span> with <span class="katex-inline">\eta^k(a) = \eta^k(b) = 0</span>. Then:</p>
+          <div class="math-block">
+            <span class="katex-display">\frac{d}{d\varepsilon}\bigg|_{\varepsilon=0} E[\gamma_\varepsilon] = \frac{1}{2} \int_a^b \left( \frac{\partial g_{ij}}{\partial x^k}\, \eta^k\, \dot x^i \dot x^j + 2\, g_{ij}\, \dot\eta^i\, \dot x^j \right) dt</span>
+          </div>
+
+          <h4>Integration by parts</h4>
+          <p>The second term contains <span class="katex-inline">\dot\eta^i</span>. We integrate by parts:</p>
+          <div class="math-block">
+            <span class="katex-display">\int_a^b g_{ij}\, \dot\eta^i\, \dot x^j \, dt = \Big[\, g_{ij}\, \eta^i\, \dot x^j \Big]_a^b - \int_a^b \eta^i \frac{d}{dt}\!\left(g_{ij}\, \dot x^j\right) dt</span>
+          </div>
+          <p>The boundary term vanishes because <span class="katex-inline">\eta(a) = \eta(b) = 0</span>. Expanding the time derivative:</p>
+          <div class="math-block">
+            <span class="katex-display">\frac{d}{dt}\!\left(g_{ij}\, \dot x^j\right) = g_{ij}\, \ddot x^j + \frac{\partial g_{ij}}{\partial x^k}\, \dot x^k\, \dot x^j</span>
+          </div>
+
+          <h4>Collecting terms</h4>
+          <p>Substituting back and relabeling indices so that <span class="katex-inline">\eta^k</span> factors out:</p>
+          <div class="math-block">
+            <span class="katex-display">\frac{d}{d\varepsilon}\bigg|_{\varepsilon=0} E = \int_a^b \eta^k \left[ -g_{kj}\, \ddot x^j + \frac{1}{2}\left( \frac{\partial g_{ij}}{\partial x^k} - \frac{\partial g_{kj}}{\partial x^i} - \frac{\partial g_{ki}}{\partial x^j} \right) \dot x^i \dot x^j \right] dt</span>
+          </div>
+
+          <h4>The Euler-Lagrange equation</h4>
+          <p>Since this must vanish for <em>all</em> <span class="katex-inline">\eta^k</span> (the fundamental lemma of calculus of variations), the bracketed expression is zero. Multiplying through by <span class="katex-inline">g^{km}</span>:</p>
+          <div class="math-block">
+            <span class="katex-display">\ddot x^m + \underbrace{\frac{1}{2}\, g^{mk}\!\left(\frac{\partial g_{kj}}{\partial x^i} + \frac{\partial g_{ki}}{\partial x^j} - \frac{\partial g_{ij}}{\partial x^k}\right)}_{\Gamma^m_{ij}}\, \dot x^i\, \dot x^j = 0</span>
+          </div>
+          <p>We recognize the Christoffel symbols from Chapter 3. The Euler-Lagrange equation for the energy functional <em>is</em> the geodesic equation.</p>
+        </div>
+      </div>
+
+      <!-- ── Section 4: The Geodesic Equation ── -->
+      <h3>The Geodesic Equation</h3>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>A curve <span class="katex-inline">\gamma(t)</span> on a Riemannian manifold is a <strong>geodesic</strong> if it satisfies:</p>
+      </div>
 
       <div class="math-block">
         <span class="katex-display">\frac{d^2 x^k}{dt^2} + \Gamma^k_{ij} \frac{dx^i}{dt} \frac{dx^j}{dt} = 0</span>
       </div>
 
-      <h3>Parallel Transport</h3>
-      <p>A vector field <span class="katex-inline">V</span> along <span class="katex-inline">\gamma</span> is parallel if <span class="katex-inline">\nabla_{\dot\gamma} V = 0</span>. This defines a linear isomorphism between tangent spaces along the curve.</p>
+      <p>This equation has two readings. From the calculus of variations: geodesics are critical points of the energy functional. From the connection of Chapter 3: geodesics are curves that <strong>parallel-transport their own tangent vector</strong>, i.e. <span class="katex-inline">\nabla_{\dot\gamma} \dot\gamma = 0</span>. These two characterizations are equivalent.</p>
+
+      <p><strong>On <span class="katex-inline">S^2</span></strong>, using the Christoffel symbols computed in Chapter 3, the geodesic equation becomes a coupled system for <span class="katex-inline">\theta(t)</span> and <span class="katex-inline">\varphi(t)</span>:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\ddot\theta - \sin\theta\cos\theta\;\dot\varphi^2 = 0, \qquad \ddot\varphi + 2\frac{\cos\theta}{\sin\theta}\;\dot\theta\,\dot\varphi = 0</span>
+      </div>
+
+      <p>The solutions are great circles. Choose a point and an initial direction to trace one:</p>
 
       <div class="viz-container">
-        <span class="viz-placeholder">[ interactive: geodesics on sphere and torus ]</span>
+        <canvas id="ch4-geodesic"></canvas>
       </div>
+
+      <!-- ── Section 5: Parallel Transport ── -->
+      <h3>Parallel Transport</h3>
+
+      <p>The geodesic equation says <span class="katex-inline">\nabla_{\dot\gamma} \dot\gamma = 0</span>: the tangent vector is "constant" along the curve. We can generalize this to <em>any</em> vector carried along <em>any</em> curve.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>A vector field <span class="katex-inline">V(t)</span> along a curve <span class="katex-inline">\gamma(t)</span> is <strong>parallel-transported</strong> if <span class="katex-inline">\nabla_{\dot\gamma} V = 0</span>. In coordinates:</p>
+      </div>
+
+      <div class="math-block">
+        <span class="katex-display">\frac{dV^k}{dt} + \Gamma^k_{ij}\, \dot\gamma^i\, V^j = 0</span>
+      </div>
+
+      <p>Given an initial vector <span class="katex-inline">V(0) \in T_{\gamma(0)}M</span>, this first-order linear ODE has a unique solution. Parallel transport defines a linear isomorphism between tangent spaces at different points along the curve.</p>
+
+      <h3>Holonomy</h3>
+
+      <p>On a flat surface, parallel-transporting a vector around a closed loop returns it unchanged. On a curved surface, it comes back <em>rotated</em>. The rotation angle is called the <strong>holonomy</strong> of the loop.</p>
+
+      <p>For a geodesic triangle on <span class="katex-inline">S^2</span> with interior angles <span class="katex-inline">A, B, C</span>, the holonomy equals the <strong>angular excess</strong>:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\Omega = A + B + C - \pi = \int\!\!\int_\Delta K \, dA</span>
+      </div>
+
+      <p>where <span class="katex-inline">K = 1</span> is the Gaussian curvature of the unit sphere and <span class="katex-inline">\Delta</span> is the region enclosed. This is the <strong>Gauss-Bonnet theorem</strong> in action, and it connects parallel transport directly to the curvature of Chapter 5.</p>
+
+      <div class="viz-container">
+        <canvas id="ch4-holonomy"></canvas>
+      </div>
+
+      <p>We have seen that parallel transport reveals something fundamental about a surface: it rotates vectors, and the rotation is proportional to the enclosed area. This "rotation per unit area" is the <strong>curvature</strong>. In the next chapter, we make this precise and extend the notion beyond surfaces to manifolds of any dimension.</p>
+
     </div>
   </section>
 
@@ -324,64 +553,274 @@
     <div class="chapter-number">05</div>
     <h2><span>Curvature</span></h2>
     <p class="chapter-intro">
-      Curvature measures how a manifold deviates from being flat. The Riemann tensor captures this intrinsic property completely.
+      In Chapter 4, we saw that parallel transport around a loop rotates a vector. Curvature is what makes this happen: it measures, at each point, how much the manifold deviates from being flat.
     </p>
     <div class="chapter-body">
-      <div class="definition">
-        <div class="definition-label">Definition</div>
-        <p>The <strong>Riemann curvature tensor</strong> measures the failure of covariant derivatives to commute:</p>
-      </div>
+
+      <!-- ── Section 1: Curvature from holonomy ── -->
+      <h3>From Holonomy to Curvature</h3>
+
+      <p>Recall from Chapter 4: parallel-transporting a vector around a geodesic triangle on <span class="katex-inline">S^2</span> produces a rotation <span class="katex-inline">\Omega</span> equal to the area of the triangle (since <span class="katex-inline">K = 1</span> on the unit sphere). Now consider what happens when we shrink the triangle toward a single point <span class="katex-inline">p</span>.</p>
+
+      <p>As the triangle contracts, both the holonomy <span class="katex-inline">\Omega</span> and the enclosed area <span class="katex-inline">A</span> tend to zero. But their <em>ratio</em> converges to a definite limit:</p>
 
       <div class="math-block">
-        <span class="katex-display">R(X, Y)Z = \nabla_X \nabla_Y Z - \nabla_Y \nabla_X Z - \nabla_{[X,Y]} Z</span>
+        <span class="katex-display">K(p) = \lim_{A \to 0} \frac{\Omega}{A}</span>
       </div>
 
-      <h3>Ricci and Scalar Curvature</h3>
-      <p>Contracting the Riemann tensor yields the Ricci tensor <span class="katex-inline">R_{ij} = R^k_{\ ikj}</span> and scalar curvature <span class="katex-inline">R = g^{ij}R_{ij}</span>.</p>
-
-      <h3>Sectional Curvature</h3>
-      <p>For a 2-plane <span class="katex-inline">\sigma = \text{span}(X, Y)</span> in <span class="katex-inline">T_pM</span>:</p>
-
-      <div class="math-block">
-        <span class="katex-display">K(\sigma) = \frac{\langle R(X, Y)Y, X \rangle}{\langle X, X\rangle\langle Y, Y\rangle - \langle X, Y\rangle^2}</span>
-      </div>
+      <p>This limit is the <strong>Gaussian curvature</strong> at <span class="katex-inline">p</span>. It is a local quantity: the amount of "rotation per unit area" that the surface generates at each point. On the unit sphere, <span class="katex-inline">K = 1</span> everywhere. On a flat plane, <span class="katex-inline">K = 0</span>.</p>
 
       <div class="viz-container">
-        <span class="viz-placeholder">[ interactive: Gaussian curvature heatmap on surfaces ]</span>
+        <canvas id="ch5-shrink"></canvas>
       </div>
+
+      <!-- ── Section 2: Gaussian curvature ── -->
+      <h3>Gaussian Curvature</h3>
+
+      <p>For a surface in <span class="katex-inline">\mathbb{R}^3</span>, Gaussian curvature can be understood through <strong>principal curvatures</strong>.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>At each point of a surface in <span class="katex-inline">\mathbb{R}^3</span>, the <strong>principal curvatures</strong> <span class="katex-inline">\kappa_1</span> and <span class="katex-inline">\kappa_2</span> are the maximum and minimum curvatures of normal cross-sections. The <strong>Gaussian curvature</strong> is their product.</p>
+      </div>
+
+      <p>At each point, the surface bends most in one direction (<span class="katex-inline">\kappa_1</span>) and least in another (<span class="katex-inline">\kappa_2</span>):</p>
+
+      <div class="math-block">
+        <span class="katex-display">K = \kappa_1 \, \kappa_2</span>
+      </div>
+
+      <p>This gives a geometric classification:</p>
+      <ul style="margin: 0.5rem 0 1rem 1.5rem; color: var(--text-muted);">
+        <li><span class="katex-inline">K > 0</span>: the surface curves the same way in all directions (sphere, ellipsoid). Triangles have angle excess.</li>
+        <li><span class="katex-inline">K = 0</span>: the surface is flat in at least one direction (plane, cylinder). Triangles have angle sum <span class="katex-inline">\pi</span>.</li>
+        <li><span class="katex-inline">K < 0</span>: the surface bends in opposite directions (saddle, hyperboloid). Triangles have angle deficit.</li>
+      </ul>
+
+      <div class="definition">
+        <div class="definition-label">Theorema Egregium (Gauss, 1827)</div>
+        <p>The Gaussian curvature <span class="katex-inline">K</span> depends only on the metric <span class="katex-inline">g_{ij}</span> and its derivatives, not on how the surface is embedded in <span class="katex-inline">\mathbb{R}^3</span>. In other words, <span class="katex-inline">K</span> is an <strong>intrinsic</strong> invariant: a creature living on the surface could measure it without any knowledge of the ambient space.</p>
+      </div>
+
+      <p>This is remarkable. A cylinder has <span class="katex-inline">K = 0</span> everywhere: you can unroll it flat without stretching. A sphere has <span class="katex-inline">K > 0</span>: no map of the Earth can be distance-preserving (this is why all flat maps distort). These are intrinsic facts, detectable from within the surface.</p>
+
+      <p><strong>On <span class="katex-inline">S^2</span></strong>, using the round metric from Chapter 3 (<span class="katex-inline">g_{\theta\theta} = 1</span>, <span class="katex-inline">g_{\varphi\varphi} = \sin^2\theta</span>), the Gaussian curvature formula gives <span class="katex-inline">K = 1</span> everywhere, confirming our holonomy computation.</p>
+
+      <p>On a <strong>torus</strong> with major radius <span class="katex-inline">a</span> and minor radius <span class="katex-inline">b</span>, parametrized by <span class="katex-inline">(u, v)</span>:</p>
+
+      <div class="math-block">
+        <span class="katex-display">K(u, v) = \frac{\cos v}{b(a + b\cos v)}</span>
+      </div>
+
+      <p>The outer rim (<span class="katex-inline">v = 0</span>) has <span class="katex-inline">K > 0</span> (sphere-like), the inner rim (<span class="katex-inline">v = \pi</span>) has <span class="katex-inline">K < 0</span> (saddle-like), and the top and bottom circles (<span class="katex-inline">v = \pm\pi/2</span>) have <span class="katex-inline">K = 0</span>. The total curvature integrates to zero, consistent with the Gauss-Bonnet theorem for a torus (Euler characteristic <span class="katex-inline">\chi = 0</span>).</p>
+
+      <div class="viz-container">
+        <canvas id="ch5-heatmap"></canvas>
+      </div>
+
+      <!-- ── Section 3: The Riemann tensor ── -->
+      <h3>The Riemann Curvature Tensor</h3>
+
+      <p>On a 2-dimensional surface, a single number <span class="katex-inline">K(p)</span> captures all curvature information at <span class="katex-inline">p</span>. In higher dimensions, curvature is richer: the manifold can curve differently in different 2-planes through <span class="katex-inline">p</span>. We need a more powerful object.</p>
+
+      <p>The <strong>Riemann curvature tensor</strong> measures the failure of covariant derivatives to commute. On <span class="katex-inline">\mathbb{R}^n</span>, the order of differentiation does not matter: <span class="katex-inline">\nabla_X \nabla_Y Z = \nabla_Y \nabla_X Z</span>. On a curved manifold, it does.</p>
+
+      <div class="definition">
+        <div class="definition-label">Notation</div>
+        <p>The <strong>Lie bracket</strong> <span class="katex-inline">[X, Y]</span> of two vector fields is the vector field defined by <span class="katex-inline">[X,Y](f) = X(Y(f)) - Y(X(f))</span> for any smooth function <span class="katex-inline">f</span>. It measures whether the flows of <span class="katex-inline">X</span> and <span class="katex-inline">Y</span> commute. For coordinate basis vectors, <span class="katex-inline">[e_i, e_j] = 0</span>.</p>
+      </div>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>The <strong>Riemann curvature tensor</strong> <span class="katex-inline">\text{Riem}</span> is defined by:</p>
+      </div>
+
+      <div class="math-block">
+        <span class="katex-display">\text{Riem}(X, Y)Z = \nabla_X \nabla_Y Z - \nabla_Y \nabla_X Z - \nabla_{[X,Y]} Z</span>
+      </div>
+
+      <p>The term <span class="katex-inline">\nabla_{[X,Y]}Z</span> corrects for the fact that <span class="katex-inline">X</span> and <span class="katex-inline">Y</span> might not commute as vector fields. For coordinate basis vectors this term vanishes, simplifying computations.</p>
+
+      <p>In coordinates, the Riemann tensor has components (often written <span class="katex-inline">R^l_{\ kij}</span> for brevity):</p>
+
+      <div class="math-block">
+        <span class="katex-display">\text{Riem}^l_{\ kij} = \frac{\partial \Gamma^l_{kj}}{\partial x^i} - \frac{\partial \Gamma^l_{ki}}{\partial x^j} + \Gamma^l_{im}\,\Gamma^m_{kj} - \Gamma^l_{jm}\,\Gamma^m_{ki}</span>
+      </div>
+
+      <p>This is a direct consequence of the Christoffel symbols from Chapter 3: curvature is built entirely from the connection and its derivatives.</p>
+
+      <!-- ── Section 4: Sectional, Ricci, Scalar ── -->
+      <h3>Sectional Curvature</h3>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>The <strong>sectional curvature</strong> of a 2-plane <span class="katex-inline">\sigma = \text{span}(X, Y)</span> in <span class="katex-inline">T_pM</span> is:</p>
+      </div>
+
+      <p>The Riemann tensor is a 4-index object, which can be hard to interpret geometrically. The sectional curvature extracts a single number for each 2-plane:</p>
+
+      <div class="math-block">
+        <span class="katex-display">K(\sigma) = \frac{\langle \text{Riem}(X, Y)Y, X \rangle}{\langle X, X\rangle\langle Y, Y\rangle - \langle X, Y\rangle^2}</span>
+      </div>
+
+      <p>Intuitively, <span class="katex-inline">K(\sigma)</span> is the Gaussian curvature of the 2-dimensional surface obtained by "slicing" the manifold along <span class="katex-inline">\sigma</span> (via geodesics starting in the directions of <span class="katex-inline">\sigma</span>). On a 2-manifold, there is only one 2-plane at each point, and <span class="katex-inline">K(\sigma)</span> reduces to the Gaussian curvature.</p>
+
+      <h3>Ricci and Scalar Curvature</h3>
+
+      <p>The Riemann tensor can be progressively simplified by contraction (summing over indices):</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>The <strong>Ricci tensor</strong> is the trace of the Riemann tensor: <span class="katex-inline">\text{Ric}_{ij} = \text{Riem}^k_{\ ikj}</span>. It averages sectional curvatures over all 2-planes containing a given direction.</p>
+      </div>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>The <strong>scalar curvature</strong> is the trace of the Ricci tensor: <span class="katex-inline">S = g^{ij}\,\text{Ric}_{ij}</span>. It is a single number at each point, summarizing the total curvature.</p>
+      </div>
+
+      <p>The hierarchy is:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\underbrace{\text{Riem}^l_{\ kij}}_{\text{Riemann (full)}} \;\xrightarrow{\text{trace}}\; \underbrace{\text{Ric}_{ij}}_{\text{Ricci (directional avg.)}} \;\xrightarrow{\text{trace}}\; \underbrace{S}_{\text{scalar (total avg.)}}</span>
+      </div>
+
+      <p>Each contraction loses information but gains interpretability. For a 2-manifold, all three are equivalent (determined by <span class="katex-inline">K</span>). In general relativity, the Einstein field equations relate the Ricci tensor to the energy-momentum content of spacetime. In machine learning, the scalar curvature of a latent space measures how much the learned representation distorts local volumes (Chapter 9).</p>
+
+      <p>All of these curvature quantities are built from the metric <span class="katex-inline">g</span> and its derivatives. In Chapter 3, we introduced the metric on <span class="katex-inline">S^2</span> to compute Christoffel symbols. In the next chapter, we study the Riemannian metric in full generality: how it defines lengths, areas, and the unique Levi-Civita connection.</p>
+
     </div>
   </section>
 
   <!-- Chapter 6 -->
   <section class="chapter" id="ch6">
     <div class="chapter-number">06</div>
-    <h2>Riemannian <span>Metrics</span></h2>
+    <h2>Metric <span>Geometry</span></h2>
     <p class="chapter-intro">
-      A Riemannian metric turns a smooth manifold into a geometric space where we can measure lengths, angles, and volumes.
+      In Chapter 3, we introduced the Riemannian metric <span class="katex-inline">g</span> on <span class="katex-inline">S^2</span> to compute Christoffel symbols. Here we explore the full power of the metric: measuring distances, computing areas, and the remarkable fact that the metric alone determines the connection.
     </p>
     <div class="chapter-body">
+
+      <!-- ── Section 1: Geodesic Distance ── -->
+      <h3>Geodesic Distance</h3>
+
+      <p>In Chapter 4, we defined the length of a curve <span class="katex-inline">\gamma: [a,b] \to M</span> using the metric. The <strong>geodesic distance</strong> between two points is the infimum of lengths over all curves connecting them:</p>
+
       <div class="definition">
         <div class="definition-label">Definition</div>
-        <p>A <strong>Riemannian metric</strong> <span class="katex-inline">g</span> is a smooth assignment of an inner product <span class="katex-inline">g_p: T_pM \times T_pM \to \mathbb{R}</span> to each tangent space.</p>
+        <p>The <strong>geodesic distance</strong> between <span class="katex-inline">p, q \in M</span> is <span class="katex-inline">d(p,q) = \inf_\gamma L(\gamma)</span>, where the infimum is taken over all piecewise smooth curves from <span class="katex-inline">p</span> to <span class="katex-inline">q</span>.</p>
       </div>
 
-      <h3>Length and Distance</h3>
-      <p>The length of a curve <span class="katex-inline">\gamma: [a, b] \to M</span> and the geodesic distance:</p>
-
-      <div class="math-block">
-        <span class="katex-display">L(\gamma) = \int_a^b \sqrt{g_{\gamma(t)}(\dot\gamma(t), \dot\gamma(t))} \, dt</span>
-      </div>
-
-      <h3>Levi-Civita Connection</h3>
-      <p>Every Riemannian manifold has a unique torsion-free, metric-compatible connection. Its Christoffel symbols are determined entirely by the metric:</p>
-
-      <div class="math-block">
-        <span class="katex-display">\Gamma^k_{ij} = \frac{1}{2} g^{kl} \left( \frac{\partial g_{jl}}{\partial x^i} + \frac{\partial g_{il}}{\partial x^j} - \frac{\partial g_{ij}}{\partial x^l} \right)</span>
-      </div>
+      <p>This distance function turns <span class="katex-inline">(M, d)</span> into a <strong>metric space</strong> in the topological sense. On <span class="katex-inline">S^2</span>, the geodesic distance between two points is the angle between them (for the unit sphere): <span class="katex-inline">d(p,q) = \arccos(\langle p, q \rangle)</span>. The geodesics (great circles) are precisely the curves that achieve this minimum.</p>
 
       <div class="viz-container">
-        <span class="viz-placeholder">[ interactive: metric distortion visualization ]</span>
+        <canvas id="ch6-distance"></canvas>
       </div>
+
+      <!-- ── Section 2: Riemannian Volume ── -->
+      <h3>Riemannian Volume</h3>
+
+      <p>The metric also lets us measure areas and volumes. In coordinates <span class="katex-inline">(x^1, \ldots, x^n)</span>, the <strong>volume element</strong> is:</p>
+
+      <div class="math-block">
+        <span class="katex-display">d\text{Vol} = \sqrt{\det(g_{ij})} \; dx^1 \wedge \cdots \wedge dx^n</span>
+      </div>
+
+      <p>The factor <span class="katex-inline">\sqrt{\det(g_{ij})}</span> accounts for the distortion introduced by the coordinate system. On <span class="katex-inline">S^2</span>:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\det(g_{ij}) = \det \begin{pmatrix} 1 & 0 \\ 0 & \sin^2\theta \end{pmatrix} = \sin^2\theta \quad \Rightarrow \quad d\text{Vol} = \sin\theta \; d\theta \, d\varphi</span>
+      </div>
+
+      <p>This is the familiar area element on the sphere. It shrinks near the poles (<span class="katex-inline">\theta \to 0, \pi</span>) where the coordinate grid compresses. Integrating over the full sphere gives <span class="katex-inline">\int_0^\pi \int_0^{2\pi} \sin\theta \, d\varphi \, d\theta = 4\pi</span>.</p>
+
+      <div class="viz-container">
+        <canvas id="ch6-volume"></canvas>
+      </div>
+
+      <!-- ── Section 3: Isometries ── -->
+      <h3>Isometries</h3>
+
+      <div class="definition">
+        <div class="definition-label">Definition</div>
+        <p>An <strong>isometry</strong> between Riemannian manifolds <span class="katex-inline">(M, g)</span> and <span class="katex-inline">(N, h)</span> is a diffeomorphism <span class="katex-inline">\phi: M \to N</span> that preserves the metric: <span class="katex-inline">\phi^* h = g</span>. In other words, <span class="katex-inline">h_{\phi(p)}(d\phi(v), d\phi(w)) = g_p(v, w)</span> for all tangent vectors <span class="katex-inline">v, w \in T_pM</span>.</p>
+      </div>
+
+      <p>Isometries preserve everything that the metric defines: distances, angles, areas, curvature, geodesics. They are the "rigid motions" of Riemannian geometry.</p>
+
+      <p>A <strong>cylinder</strong> and a <strong>flat plane</strong> are locally isometric (you can unroll a cylinder without stretching). Both have <span class="katex-inline">K = 0</span>. A sphere and a plane are <em>not</em> locally isometric (no distance-preserving map exists), which is why every flat world map necessarily distorts distances. This is a consequence of the Theorema Egregium (Chapter 5): isometries preserve Gaussian curvature, and <span class="katex-inline">K = 1 \neq 0</span>.</p>
+
+      <!-- ── Section 4: Levi-Civita ── -->
+      <h3>The Levi-Civita Connection</h3>
+
+      <p>In Chapter 3, we defined the covariant derivative <span class="katex-inline">\nabla</span> on <span class="katex-inline">S^2</span> by projecting ordinary derivatives onto the tangent plane. On a general Riemannian manifold, there are many possible connections. A remarkable theorem says that the metric singles out a unique one.</p>
+
+      <div class="definition">
+        <div class="definition-label">Theorem (Fundamental Theorem of Riemannian Geometry)</div>
+        <p>On any Riemannian manifold <span class="katex-inline">(M, g)</span>, there exists a unique connection <span class="katex-inline">\nabla</span> (the <strong>Levi-Civita connection</strong>) satisfying:</p>
+        <ol style="margin: 0.5rem 0 0 1.5rem; color: var(--text-muted);">
+          <li><strong>Metric compatibility:</strong> <span class="katex-inline">\nabla g = 0</span>, i.e. <span class="katex-inline">X(g(Y,Z)) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)</span>.</li>
+          <li><strong>Torsion-free:</strong> <span class="katex-inline">\nabla_X Y - \nabla_Y X = [X, Y]</span>.</li>
+        </ol>
+      </div>
+
+      <p>Metric compatibility means parallel transport preserves inner products: lengths and angles are unchanged. Torsion-free means the connection is symmetric (<span class="katex-inline">\Gamma^k_{ij} = \Gamma^k_{ji}</span>). Together, these two conditions determine the Christoffel symbols entirely from the metric:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\Gamma^k_{ij} = \frac{1}{2}\, g^{kl} \left( \frac{\partial g_{jl}}{\partial x^i} + \frac{\partial g_{il}}{\partial x^j} - \frac{\partial g_{ij}}{\partial x^l} \right)</span>
+      </div>
+
+      <button class="proof-trigger" onclick="document.getElementById('proof-levi-civita').classList.add('open')">
+        Proof: Levi-Civita formula
+      </button>
+
+      <!-- ── Proof card (Levi-Civita) ── -->
+      <div class="proof-overlay" id="proof-levi-civita">
+        <div class="proof-card">
+          <button class="proof-card-close" onclick="this.closest('.proof-overlay').classList.remove('open')">&times;</button>
+          <div class="proof-card-title">Proof: Levi-Civita Formula</div>
+
+          <h4>Strategy</h4>
+          <p>We derive the Christoffel symbol formula by writing out metric compatibility three times with permuted indices, then combining to isolate <span class="katex-inline">\Gamma</span>.</p>
+
+          <h4>Step 1: Metric compatibility in coordinates</h4>
+          <p>The condition <span class="katex-inline">\nabla g = 0</span> applied to coordinate basis vectors gives:</p>
+          <div class="math-block">
+            <span class="katex-display">\frac{\partial g_{jl}}{\partial x^i} = \Gamma^m_{ij}\, g_{ml} + \Gamma^m_{il}\, g_{jm}</span>
+          </div>
+          <p>This says: the change in the metric along <span class="katex-inline">x^i</span> is accounted for entirely by the Christoffel symbols.</p>
+
+          <h4>Step 2: Cyclic permutation</h4>
+          <p>Write the same equation with indices permuted cyclically:</p>
+          <div class="math-block">
+            <span class="katex-display">(A):\; \frac{\partial g_{jl}}{\partial x^i} = \Gamma^m_{ij}\, g_{ml} + \Gamma^m_{il}\, g_{jm}</span>
+          </div>
+          <div class="math-block">
+            <span class="katex-display">(B):\; \frac{\partial g_{il}}{\partial x^j} = \Gamma^m_{ji}\, g_{ml} + \Gamma^m_{jl}\, g_{im}</span>
+          </div>
+          <div class="math-block">
+            <span class="katex-display">(C):\; \frac{\partial g_{ij}}{\partial x^l} = \Gamma^m_{li}\, g_{mj} + \Gamma^m_{lj}\, g_{im}</span>
+          </div>
+
+          <h4>Step 3: Combine using torsion-free</h4>
+          <p>Compute <span class="katex-inline">(A) + (B) - (C)</span>. Using <span class="katex-inline">\Gamma^m_{ij} = \Gamma^m_{ji}</span> (torsion-free), many terms cancel and we get:</p>
+          <div class="math-block">
+            <span class="katex-display">\frac{\partial g_{jl}}{\partial x^i} + \frac{\partial g_{il}}{\partial x^j} - \frac{\partial g_{ij}}{\partial x^l} = 2\, \Gamma^m_{ij}\, g_{ml}</span>
+          </div>
+
+          <h4>Step 4: Solve for Γ</h4>
+          <p>Multiply both sides by <span class="katex-inline">\frac{1}{2}\, g^{kl}</span> (the inverse metric from Chapter 3) and sum over <span class="katex-inline">l</span>:</p>
+          <div class="math-block">
+            <span class="katex-display">\Gamma^k_{ij} = \frac{1}{2}\, g^{kl} \left( \frac{\partial g_{jl}}{\partial x^i} + \frac{\partial g_{il}}{\partial x^j} - \frac{\partial g_{ij}}{\partial x^l} \right) \qquad \square</span>
+          </div>
+          <p>Since the right-hand side involves only the metric and its first derivatives, the connection is completely determined by <span class="katex-inline">g</span>. This is why we could compute the Christoffel symbols in Chapter 3 from the round metric alone.</p>
+        </div>
+      </div>
+
+      <p>This formula closes the circle: in Chapter 3, we computed the Christoffel symbols of <span class="katex-inline">S^2</span> by projecting derivatives in <span class="katex-inline">\mathbb{R}^3</span>. Here we see that the same symbols emerge purely from the metric <span class="katex-inline">g_{\theta\theta} = 1</span>, <span class="katex-inline">g_{\varphi\varphi} = \sin^2\theta</span>, without any reference to an ambient space. The metric is all you need.</p>
+
+      <p>With the full toolkit of metric geometry in hand (distances, areas, curvature, the Levi-Civita connection), we can now move toward applications. In the next chapter, we study how to <strong>project</strong> points onto manifolds and how the <strong>exponential map</strong> links tangent spaces to the manifold itself.</p>
+
     </div>
   </section>
 
@@ -390,27 +829,201 @@
     <div class="chapter-number">07</div>
     <h2>Projection onto <span>Manifolds</span></h2>
     <p class="chapter-intro">
-      Given a point in ambient space, finding the closest point on a manifold is fundamental for optimization, statistics, and ML.
+      Given a point in ambient space, finding the closest point on a manifold is fundamental for optimization, statistics, and ML. The exponential map reverses the question: starting from the tangent space, it shoots geodesics onto the manifold, giving the definitive answer to our central question.
     </p>
     <div class="chapter-body">
+
+      <!-- ── Section 1: The Normal Bundle ── -->
+      <h3>The Normal Bundle</h3>
+      <p>In Chapters 1 through 6, we lived entirely "on" the manifold. Now we step back and ask: given a manifold <span class="katex-inline">M</span> embedded in ambient space <span class="katex-inline">\mathbb{R}^n</span>, what happens to nearby points that are <em>not</em> on <span class="katex-inline">M</span>? This requires understanding directions perpendicular to the surface.</p>
+
       <div class="definition">
-        <div class="definition-label">Definition</div>
-        <p>The <strong>projection map</strong> <span class="katex-inline">\pi: U \to M</span> sends each point in a tubular neighborhood to its nearest point on <span class="katex-inline">M</span>.</p>
+        <div class="definition-label">Definition — Normal Space</div>
+        <p>For <span class="katex-inline">M</span> embedded in <span class="katex-inline">\mathbb{R}^n</span>, the <strong>normal space</strong> at <span class="katex-inline">p</span> is:</p>
       </div>
-
-      <h3>Normal Bundle and Tubular Neighborhoods</h3>
-      <p>For an embedded submanifold, the normal bundle provides directions perpendicular to the manifold. A tubular neighborhood is a diffeomorphic image of a neighborhood of the zero section.</p>
-
-      <h3>Exponential Map</h3>
-      <p>The exponential map <span class="katex-inline">\exp_p: T_pM \to M</span> sends tangent vectors to the manifold along geodesics:</p>
-
       <div class="math-block">
-        <span class="katex-display">\exp_p(v) = \gamma_v(1) \quad \text{where} \quad \gamma_v(0) = p, \; \dot\gamma_v(0) = v</span>
+        <span class="katex-display">N_pM = \{ \mathbf{n} \in \mathbb{R}^n : g(\mathbf{n}, v) = 0 \;\;\forall\, v \in T_pM \}</span>
       </div>
+
+      <p>On <span class="katex-inline">S^2 \subset \mathbb{R}^3</span>, the tangent plane at <span class="katex-inline">p</span> is the plane perpendicular to <span class="katex-inline">p</span> (viewed as a radius vector). Therefore <span class="katex-inline">N_pS^2 = \text{span}(p)</span>: the normal direction at any point on the sphere is simply the radial direction.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Normal Bundle</div>
+        <p>The <strong>normal bundle</strong> collects all normal spaces into a single smooth manifold:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">NM = \{ (p, \mathbf{n}) : p \in M,\; \mathbf{n} \in N_pM \}</span>
+      </div>
+      <p>If <span class="katex-inline">M</span> has dimension <span class="katex-inline">k</span> inside <span class="katex-inline">\mathbb{R}^n</span>, then <span class="katex-inline">NM</span> is itself a smooth manifold of dimension <span class="katex-inline">n</span> (the <span class="katex-inline">k</span> dimensions of <span class="katex-inline">M</span> plus the <span class="katex-inline">n - k</span> normal directions at each point).</p>
+
+
+      <!-- ── Section 2: Projection and Tubular Neighborhoods ── -->
+      <h3>Projection and Tubular Neighborhoods</h3>
+      <p>Given a point <span class="katex-inline">q</span> near <span class="katex-inline">M</span> but not on it, the <strong>nearest-point projection</strong> sends <span class="katex-inline">q</span> to the closest point on <span class="katex-inline">M</span>.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Nearest-Point Projection</div>
+        <p>The <strong>projection map</strong> <span class="katex-inline">\pi</span> is defined by:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">\pi(q) = \arg\min_{p \in M} \| q - p \|</span>
+      </div>
+
+      <p>This is well-defined only if <span class="katex-inline">q</span> is "close enough" to <span class="katex-inline">M</span>. Points too far away may have multiple closest points. Consider the center of a sphere: every surface point is equidistant, so <span class="katex-inline">\pi(0)</span> is undefined. The region where projection is well-behaved is called a <strong>tubular neighborhood</strong>.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Tubular Neighborhood</div>
+        <p>A <strong>tubular neighborhood</strong> of <span class="katex-inline">M</span> in <span class="katex-inline">\mathbb{R}^n</span> is an open set <span class="katex-inline">U \supset M</span> such that <span class="katex-inline">\pi: U \to M</span> is a smooth submersion. Concretely:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">U = \{ p + t\,\mathbf{n}(p) : p \in M,\; \mathbf{n}(p) \in N_pM,\; \|\mathbf{n}(p)\| = 1,\; |t| < \varepsilon \}</span>
+      </div>
+
+      <div class="definition">
+        <div class="definition-label">Theorem — Tubular Neighborhood Theorem</div>
+        <p>Every compact embedded submanifold <span class="katex-inline">M \subset \mathbb{R}^n</span> admits a tubular neighborhood.</p>
+      </div>
+
+      <p>On <span class="katex-inline">S^2</span>, the tubular neighborhood is the open shell <span class="katex-inline">\{ q \in \mathbb{R}^3 : 1 - \varepsilon < \|q\| < 1 + \varepsilon \}</span> for any <span class="katex-inline">\varepsilon \in (0, 1)</span>. The projection takes a particularly simple form:</p>
+      <div class="math-block">
+        <span class="katex-display">\pi(q) = \frac{q}{\|q\|}, \qquad q \neq 0</span>
+      </div>
+      <p>The distance from <span class="katex-inline">q</span> to its projection is <span class="katex-inline">\|q - \pi(q)\| = |\,\|q\| - 1\,|</span>: simply how far <span class="katex-inline">q</span> is from the unit sphere.</p>
 
       <div class="viz-container">
-        <span class="viz-placeholder">[ interactive: projection onto sphere / torus ]</span>
+        <canvas id="ch7-projection"></canvas>
       </div>
+
+      <button class="proof-trigger" onclick="document.getElementById('proof-projection-sphere').classList.add('open')">
+        Proof: projection formula on S²
+      </button>
+      <div class="proof-overlay" id="proof-projection-sphere">
+        <div class="proof-card">
+          <button class="proof-card-close" onclick="this.closest('.proof-overlay').classList.remove('open')">&times;</button>
+          <div class="proof-card-title">Proof: Projection Formula on S²</div>
+          <p>We minimize <span class="katex-inline">\|q - p\|^2</span> subject to <span class="katex-inline">\|p\| = 1</span>.</p>
+          <p><strong>Step 1.</strong> By Lagrange multipliers, at a minimum we need <span class="katex-inline">q - p = \lambda\, p</span> for some <span class="katex-inline">\lambda \in \mathbb{R}</span>.</p>
+          <p><strong>Step 2.</strong> This gives <span class="katex-inline">q = (1 + \lambda)\, p</span>, so <span class="katex-inline">p = q / (1 + \lambda)</span>. Since <span class="katex-inline">\|p\| = 1</span>, we get <span class="katex-inline">|1 + \lambda| = \|q\|</span>.</p>
+          <p><strong>Step 3.</strong> Taking the sign that minimizes distance yields:</p>
+          <div class="math-block">
+            <span class="katex-display">p = \frac{q}{\|q\|}, \qquad \|q - \pi(q)\| = |\,\|q\| - 1\,| \qquad \square</span>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ── Section 3: The Exponential Map ── -->
+      <h3>The Exponential Map</h3>
+      <p>Projection maps <em>from</em> ambient space <em>to</em> the manifold. The exponential map goes the other way: <em>from</em> the tangent space <em>to</em> the manifold. It is arguably the most important construction in Riemannian geometry.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Exponential Map</div>
+        <p>The <strong>exponential map</strong> at <span class="katex-inline">p</span> sends a tangent vector to the point reached by following the geodesic it defines:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">\exp_p : T_pM \to M, \qquad \exp_p(v) = \gamma_v(1)</span>
+      </div>
+      <p>where <span class="katex-inline">\gamma_v</span> is the unique geodesic with <span class="katex-inline">\gamma_v(0) = p</span> and <span class="katex-inline">\dot\gamma_v(0) = v</span>. In words: "walk from <span class="katex-inline">p</span> in direction <span class="katex-inline">v</span> for unit time along the geodesic with initial speed <span class="katex-inline">\|v\|_g</span>." The distance traveled is <span class="katex-inline">\|v\|_g</span>.</p>
+
+      <p>This is the precise answer to the blog's central question. The exponential map converts "straight lines in the tangent plane" into "straight lines on the curved surface" (geodesics).</p>
+
+      <p>On <span class="katex-inline">S^2</span>, geodesics are great circles. For <span class="katex-inline">p \in S^2</span> and <span class="katex-inline">v \in T_pS^2</span> with <span class="katex-inline">\|v\| = r</span>, the closed-form expression is:</p>
+      <div class="math-block">
+        <span class="katex-display">\exp_p(v) = \cos(r)\, p + \sin(r)\, \frac{v}{r}</span>
+      </div>
+      <p>This follows directly from the parametrization of great circles: <span class="katex-inline">t \mapsto \cos(t)\, p + \sin(t)\, \hat{v}</span> evaluated at <span class="katex-inline">t = \|v\|</span>.</p>
+
+      <p><strong>Key properties of exp:</strong></p>
+      <ol>
+        <li><span class="katex-inline">\exp_p(0) = p</span></li>
+        <li><span class="katex-inline">d(\exp_p)_0 = \mathrm{id}_{T_pM}</span> (the differential at zero is the identity)</li>
+        <li><span class="katex-inline">t \mapsto \exp_p(tv)</span> is the geodesic with initial velocity <span class="katex-inline">v</span></li>
+        <li><span class="katex-inline">\exp_p</span> is a local diffeomorphism near <span class="katex-inline">0</span> (by the inverse function theorem, since <span class="katex-inline">d(\exp_p)_0 = \mathrm{id}</span>)</li>
+      </ol>
+
+      <div class="viz-container">
+        <canvas id="ch7-expmap"></canvas>
+      </div>
+
+
+      <!-- ── Section 4: The Logarithmic Map and Injectivity Radius ── -->
+      <h3>The Logarithmic Map</h3>
+      <p>Since <span class="katex-inline">\exp_p</span> is a local diffeomorphism, it has a local inverse.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Logarithmic Map</div>
+        <p>The <strong>logarithmic map</strong> is the local inverse of the exponential map:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">\log_p : U \subset M \to T_pM, \qquad \log_p = (\exp_p)^{-1}</span>
+      </div>
+      <p>It returns the initial velocity of the geodesic from <span class="katex-inline">p</span> to <span class="katex-inline">q</span>. On <span class="katex-inline">S^2</span>, with <span class="katex-inline">d = \arccos\langle p, q \rangle</span>:</p>
+      <div class="math-block">
+        <span class="katex-display">\log_p(q) = d \cdot \frac{q - \langle p, q \rangle\, p}{\|q - \langle p, q \rangle\, p\|}</span>
+      </div>
+      <p>The numerator <span class="katex-inline">q - \langle p, q \rangle\, p</span> is the component of <span class="katex-inline">q</span> tangent to <span class="katex-inline">S^2</span> at <span class="katex-inline">p</span>, and <span class="katex-inline">d</span> is the geodesic distance (from Chapter 6).</p>
+
+      <p>How far can we push <span class="katex-inline">\exp_p</span> before it stops being injective? This is captured by the <strong>injectivity radius</strong>.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Injectivity Radius</div>
+        <p>The <strong>injectivity radius</strong> at <span class="katex-inline">p</span> is:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">\mathrm{inj}(p) = \sup \{ r > 0 : \exp_p \text{ is a diffeomorphism on } B_r(0) \subset T_pM \}</span>
+      </div>
+
+      <p>On <span class="katex-inline">S^2</span>, <span class="katex-inline">\mathrm{inj}(p) = \pi</span> for every <span class="katex-inline">p</span>. The exponential map is a diffeomorphism on the open disk of radius <span class="katex-inline">\pi</span> in <span class="katex-inline">T_pM</span>. It fails at the antipodal point <span class="katex-inline">-p</span> (distance <span class="katex-inline">\pi</span>), where all geodesics from <span class="katex-inline">p</span> reconverge. This point is called the <strong>cut point</strong>.</p>
+
+
+      <!-- ── Section 5: Normal Coordinates ── -->
+      <h3>Normal Coordinates</h3>
+      <p>Since <span class="katex-inline">\exp_p</span> is a diffeomorphism near <span class="katex-inline">p</span>, we can use it as a chart. This gives a coordinate system centered at <span class="katex-inline">p</span> where geodesics through <span class="katex-inline">p</span> are straight lines and the metric is Euclidean to first order.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Normal Coordinates</div>
+        <p>Choose an orthonormal basis <span class="katex-inline">\{e_1, \ldots, e_n\}</span> of <span class="katex-inline">T_pM</span>. The <strong>normal coordinate</strong> map is:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">(x^1, \ldots, x^n) \mapsto \exp_p(x^i e_i)</span>
+      </div>
+
+      <p>The key property (a consequence of the Gauss lemma) is that in normal coordinates, the metric looks Euclidean at the center and the Christoffel symbols vanish:</p>
+      <div class="math-block">
+        <span class="katex-display">g_{ij}(p) = \delta_{ij}, \qquad \Gamma^k_{ij}(p) = 0</span>
+      </div>
+      <p>The curvature appears only in the second-order correction:</p>
+      <div class="math-block">
+        <span class="katex-display">g_{ij}(x) = \delta_{ij} - \tfrac{1}{3}\, \mathrm{Riem}_{ikjl}(p)\, x^k\, x^l + O(\|x\|^3)</span>
+      </div>
+
+      <p>This is conceptually powerful: at any single point, you can always pretend you are in flat space. Curvature is what makes this approximation break down as you move away from <span class="katex-inline">p</span>. The visualization below shows this in action: radial geodesics from <span class="katex-inline">p</span> form the "coordinate lines," and on <span class="katex-inline">S^2</span> (positive curvature) they converge at the antipodal point, revealing how the metric deviates from flatness.</p>
+
+      <div class="viz-container">
+        <canvas id="ch7-normalcoord"></canvas>
+      </div>
+
+      <button class="proof-trigger" onclick="document.getElementById('proof-exp-diffeo').classList.add('open')">
+        Proof: exp<sub>p</sub> is a local diffeomorphism
+      </button>
+      <div class="proof-overlay" id="proof-exp-diffeo">
+        <div class="proof-card">
+          <button class="proof-card-close" onclick="this.closest('.proof-overlay').classList.remove('open')">&times;</button>
+          <div class="proof-card-title">Proof: exp<sub>p</sub> is a Local Diffeomorphism</div>
+          <p>We show that <span class="katex-inline">d(\exp_p)_0 = \mathrm{id}_{T_pM}</span>, then apply the inverse function theorem.</p>
+          <p><strong>Step 1.</strong> For any <span class="katex-inline">v \in T_pM</span>, consider the curve <span class="katex-inline">c(t) = tv</span> in <span class="katex-inline">T_pM</span>. Then <span class="katex-inline">\exp_p(c(t)) = \exp_p(tv) = \gamma_v(t)</span>, the geodesic with initial velocity <span class="katex-inline">v</span>.</p>
+          <p><strong>Step 2.</strong> Differentiating at <span class="katex-inline">t = 0</span>:</p>
+          <div class="math-block">
+            <span class="katex-display">d(\exp_p)_0(v) = \frac{d}{dt}\bigg|_{t=0} \exp_p(tv) = \frac{d}{dt}\bigg|_{t=0} \gamma_v(t) = \dot\gamma_v(0) = v</span>
+          </div>
+          <p><strong>Step 3.</strong> Since <span class="katex-inline">d(\exp_p)_0</span> is the identity map (hence invertible), the inverse function theorem guarantees that <span class="katex-inline">\exp_p</span> is a diffeomorphism from a neighborhood of <span class="katex-inline">0 \in T_pM</span> to a neighborhood of <span class="katex-inline">p \in M</span>. <span class="katex-inline">\square</span></p>
+        </div>
+      </div>
+
+
+      <!-- ── Transition to Ch8 ── -->
+      <p>The exponential and logarithmic maps give us a principled way to move between the tangent space (a linear space where we can do standard linear algebra) and the manifold itself. This "linearize, compute, map back" paradigm is exactly what <strong>manifold learning</strong> algorithms exploit. In the next chapter, we see how algorithms like ISOMAP, LLE, and UMAP use these geometric ideas to discover low-dimensional manifold structure hidden in high-dimensional data.</p>
+
     </div>
   </section>
 
@@ -434,6 +1047,9 @@
       <div class="viz-container">
         <span class="viz-placeholder">[ interactive: dimensionality reduction on point clouds ]</span>
       </div>
+
+      <p>These algorithms treat data as samples from an unknown manifold and recover its intrinsic geometry. But what if the manifold is not given by data, but <em>learned</em> by a neural network? In the next chapter, we study the <strong>geometry of latent spaces</strong>: how a decoder induces a Riemannian metric, and why geodesics in latent space produce smoother interpolations than straight lines.</p>
+
     </div>
   </section>
 
@@ -475,6 +1091,10 @@
   <script defer src="assets/js/ch1.js"></script>
   <script defer src="assets/js/ch2.js"></script>
   <script defer src="assets/js/ch3.js"></script>
+  <script defer src="assets/js/ch4.js"></script>
+  <script defer src="assets/js/ch5.js"></script>
+  <script defer src="assets/js/ch6.js"></script>
+  <script defer src="assets/js/ch7.js"></script>
   <script>
   // Render KaTeX after load
   window.addEventListener('DOMContentLoaded', function () {
@@ -489,6 +1109,19 @@
     // Wait for KaTeX script to load
     if (window.katex) { renderMath(); }
     else { document.querySelector('script[src*="katex.min.js"]').addEventListener('load', renderMath); }
+  });
+
+  // Close proof overlay on backdrop click
+  document.querySelectorAll('.proof-overlay').forEach(function (overlay) {
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+  // Close proof overlay on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.proof-overlay.open').forEach(function (o) { o.classList.remove('open'); });
+    }
   });
 
   // Active nav link on scroll

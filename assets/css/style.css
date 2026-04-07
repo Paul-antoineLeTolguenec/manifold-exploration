@@ -262,6 +262,126 @@ body {
   text-decoration: none;
 }
 
+/* ── Proof Card (modal overlay) ── */
+.proof-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  margin: 1rem 0;
+}
+
+.proof-trigger:hover {
+  background: var(--cyan-glow);
+  border-color: var(--cyan);
+}
+
+.proof-trigger::before {
+  content: '▸';
+  font-size: 0.7rem;
+  transition: transform 0.2s;
+}
+
+.proof-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.proof-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.proof-card {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 720px;
+  width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 2.5rem 2rem 2rem;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 212, 255, 0.05);
+}
+
+.proof-card-title {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.25rem;
+}
+
+.proof-card h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.6rem;
+  color: var(--text);
+}
+
+.proof-card p {
+  margin-bottom: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.proof-card .math-block {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.proof-card-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s;
+}
+
+.proof-card-close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* scrollbar for proof card */
+.proof-card::-webkit-scrollbar { width: 6px; }
+.proof-card::-webkit-scrollbar-track { background: transparent; }
+.proof-card::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
 /* ── KaTeX overrides ── */
 .katex { color: var(--text); }
 .katex-display { margin: 0; }
