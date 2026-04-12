@@ -14,6 +14,9 @@ Fil rouge : **"Qu'est-ce qu'une ligne droite sur une surface courbe ?"**
 - `assets/js/ch4.js` — viz ch4 (plus court chemin, variation ε, géodésique RK4, holonomie)
 - `assets/js/ch5.js` — viz ch5 (triangle contractant, heatmap courbure)
 - `assets/js/ch6.js` — viz ch6 (distance géodésique, élément de volume)
+- `assets/js/ch7.js` — viz ch7 (projection, exponentielle, logarithme)
+- `assets/js/ch8.js` — viz ch8 (Swiss roll, ISOMAP, Laplacien spectral)
+- `assets/js/ch9.js` — viz ch9 (métrique pullback + heatmap, géodésique vs interpolation linéaire)
 
 ## Stack
 - HTML/CSS/JS vanilla — pas de framework, pas de build
@@ -79,6 +82,20 @@ These symbols are **locked** — do not redefine or reuse for other meanings:
 | `exp_p` | Exponential map at p | ch7 |
 | `log_p` | Logarithmic map at p | ch7 |
 | `inj(p)` | Injectivity radius at p | ch7 |
+| `𝒳` | Ambient data space ℝ^D | ch8 |
+| `𝒵` | Embedding/latent space ℝ^d | ch8 |
+| `d_G(x_i,x_j)` | Graph shortest-path distance (NOT `d(p,q)`) | ch8 |
+| `w_{ij}` | Reconstruction weights (LLE) or adjacency weights | ch8 |
+| `L_G` | Graph Laplacian (NOT `L(γ)`) | ch8 |
+| `Δ_M` | Laplace-Beltrami operator | ch8 |
+| `σ_i` | Per-point kernel bandwidth (NOT sectional `σ`) | ch8 |
+| `p_{j\|i}, p_{ij}` | High-dimensional similarities (t-SNE/UMAP) | ch8 |
+| `q_{ij}` | Low-dimensional similarities | ch8 |
+| `𝒩(i)` | k-nearest neighbor set of x_i | ch8 |
+| `ρ_i` | Distance to nearest neighbor of x_i (UMAP) | ch8 |
+| `H_σ` | Heat kernel (NOT `K` — avoid clash with curvature) | ch8 |
+| `f` | Decoder map `f: 𝒵 → 𝒳` | ch9 |
+| `J(z)` | Jacobian of decoder, `D×d` matrix `∂f/∂z` | ch9 |
 | Einstein convention | Implicit summation on repeated up/down indices | ch3 (start of chapter) |
 
 ## Dev

@@ -1060,23 +1060,258 @@
     <div class="chapter-number">08</div>
     <h2>Manifold <span>Learning</span></h2>
     <p class="chapter-intro">
-      When data lies on or near a low-dimensional manifold in high-dimensional space, manifold learning algorithms recover that structure.
+      In Chapters 1 through 7, the manifold was given: we knew <span class="katex-inline">S^2</span>, we knew its metric, and we computed geodesics explicitly. In practice, we rarely have such luxury. Data arrives as a cloud of points in high-dimensional space, and the manifold is hidden. Manifold learning algorithms recover that hidden structure using the same geometric concepts we have built: geodesic distances, tangent spaces, and the Laplace-Beltrami operator.
     </p>
     <div class="chapter-body">
+
+      <!-- ── Section 1: The Manifold Hypothesis ── -->
       <h3>The Manifold Hypothesis</h3>
-      <p>High-dimensional data often concentrates near a low-dimensional manifold. This assumption underpins dimensionality reduction and modern representation learning.</p>
 
-      <h3>Classical Algorithms</h3>
-      <p>ISOMAP approximates geodesic distances via graph shortest paths. Locally Linear Embedding (LLE) preserves local linear reconstructions. Laplacian Eigenmaps use the graph Laplacian to find smooth embeddings.</p>
-
-      <h3>UMAP and t-SNE</h3>
-      <p>Modern methods optimize embeddings by matching neighborhood structures between high-dimensional and low-dimensional representations.</p>
-
-      <div class="viz-container">
-        <span class="viz-placeholder">[ interactive: dimensionality reduction on point clouds ]</span>
+      <div class="definition">
+        <div class="definition-label">Notation</div>
+        <p>We write <span class="katex-inline">\mathcal{X} = \mathbb{R}^D</span> for the <strong>ambient data space</strong> of dimension <span class="katex-inline">D</span>, and <span class="katex-inline">\mathcal{Z} = \mathbb{R}^d</span> for the low-dimensional <strong>embedding space</strong> with <span class="katex-inline">d \ll D</span>. A dataset is a finite sample <span class="katex-inline">\{x_1, \dots, x_N\} \subset \mathcal{X}</span>.</p>
       </div>
 
-      <p>These algorithms treat data as samples from an unknown manifold and recover its intrinsic geometry. But what if the manifold is not given by data, but <em>learned</em> by a neural network? In the next chapter, we study the <strong>geometry of latent spaces</strong>: how a decoder induces a Riemannian metric, and why geodesics in latent space produce smoother interpolations than straight lines.</p>
+      <div class="definition">
+        <div class="definition-label">Definition — Manifold Hypothesis</div>
+        <p>A dataset <span class="katex-inline">\{x_1, \dots, x_N\} \subset \mathbb{R}^D</span> satisfies the <strong>manifold hypothesis</strong> if there exists a smooth manifold <span class="katex-inline">M</span> of dimension <span class="katex-inline">d \ll D</span> and a smooth embedding <span class="katex-inline">\iota: M \hookrightarrow \mathbb{R}^D</span> such that the data concentrates near <span class="katex-inline">\iota(M)</span>.</p>
+      </div>
+
+      <p>Consider a sheet of paper rolled into a spiral in <span class="katex-inline">\mathbb{R}^3</span>: the <strong>Swiss roll</strong>. Points on this surface live in 3D, but the sheet itself is 2-dimensional. Two points close in Euclidean distance may be far apart along the surface, because the straight line between them cuts through the roll. The <em>true</em> distance is the geodesic distance <span class="katex-inline">d(p,q)</span> from Chapter 6, measured along the manifold.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Intrinsic Dimensionality</div>
+        <p>The <strong>intrinsic dimensionality</strong> of a dataset is the dimension <span class="katex-inline">d</span> of the underlying manifold <span class="katex-inline">M</span>. A point cloud in <span class="katex-inline">\mathbb{R}^D</span> with intrinsic dimension <span class="katex-inline">d</span> has <span class="katex-inline">d</span> local degrees of freedom.</p>
+      </div>
+
+      <p>The goal of manifold learning is to recover <span class="katex-inline">M</span> (or at least its intrinsic geometry) from the samples <span class="katex-inline">\{x_i\}</span>. Each algorithm below attacks this problem by approximating a different geometric quantity from the preceding chapters:</p>
+      <ul>
+        <li><strong>ISOMAP</strong> recovers the geodesic distance <span class="katex-inline">d(p,q)</span> (Chapter 6) via graph shortest paths.</li>
+        <li><strong>LLE</strong> captures the tangent space <span class="katex-inline">T_pM</span> (Chapter 2) via local linear reconstruction.</li>
+        <li><strong>Laplacian Eigenmaps</strong> approximate the Laplace-Beltrami operator <span class="katex-inline">\Delta_M</span>, built from <span class="katex-inline">g_{ij}</span> (Chapter 3) and <span class="katex-inline">\sqrt{\det g}</span> (Chapter 6).</li>
+        <li><strong>UMAP</strong> constructs a local approximation of the metric tensor <span class="katex-inline">g_{ij}</span> (Chapter 3) from neighborhood distances.</li>
+      </ul>
+
+      <div class="viz-container">
+        <canvas id="ch8-swissroll"></canvas>
+      </div>
+
+
+      <!-- ── Section 2: From Geodesic Distance to ISOMAP ── -->
+      <h3>From Geodesic Distance to ISOMAP</h3>
+
+      <p>ISOMAP (Tenenbaum, de Silva, Langford, 2000) directly targets the geodesic distance <span class="katex-inline">d(p,q)</span> from Chapter 6. If we knew the manifold, we would compute <span class="katex-inline">d(p,q) = \inf_\gamma L(\gamma)</span> as the infimum over all paths. Without the manifold, we approximate this using a graph.</p>
+
+      <div class="definition">
+        <div class="definition-label">Notation</div>
+        <p>The <strong>graph shortest-path distance</strong> <span class="katex-inline">d_G(x_i, x_j)</span> is the length of the shortest path between <span class="katex-inline">x_i</span> and <span class="katex-inline">x_j</span> in the <span class="katex-inline">k</span>-nearest-neighbor graph, where edge weights are Euclidean distances <span class="katex-inline">\|x_i - x_j\|</span>.</p>
+      </div>
+
+      <p>The algorithm proceeds in three steps: (1) build a <span class="katex-inline">k</span>-NN graph on the data, (2) compute all-pairs shortest-path distances <span class="katex-inline">d_G(x_i, x_j)</span> via Dijkstra's algorithm, (3) apply classical Multidimensional Scaling to embed points in <span class="katex-inline">\mathcal{Z} = \mathbb{R}^d</span>.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — ISOMAP Embedding</div>
+        <p>The ISOMAP embedding finds coordinates <span class="katex-inline">z_1, \dots, z_N \in \mathbb{R}^d</span> minimizing the <strong>stress</strong>:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">\text{Stress} = \sum_{i < j} \bigl( d_G(x_i, x_j) - \| z_i - z_j \| \bigr)^2</span>
+      </div>
+
+      <p>The key theoretical guarantee is that graph distances converge to geodesic distances under sufficient sampling.</p>
+
+      <!-- Proof card: graph distance convergence -->
+      <button class="proof-trigger" onclick="document.getElementById('proof-graph-convergence').classList.add('open')">
+        Proof sketch: <span class="katex-inline">d_G \to d</span> as <span class="katex-inline">N \to \infty</span>
+      </button>
+
+      <div class="proof-overlay" id="proof-graph-convergence">
+        <div class="proof-card">
+          <button class="proof-card-close" onclick="this.closest('.proof-overlay').classList.remove('open')">&times;</button>
+          <div class="proof-card-title">Proof sketch: Graph Distances Converge to Geodesic Distances</div>
+
+          <h4>Setup</h4>
+          <p>Let <span class="katex-inline">M</span> be a compact Riemannian manifold. Sample <span class="katex-inline">N</span> points uniformly on <span class="katex-inline">M</span> and build the <span class="katex-inline">\varepsilon</span>-neighborhood graph (connecting points within distance <span class="katex-inline">\varepsilon</span>).</p>
+
+          <h4>Step 1: Upper bound</h4>
+          <p>Any geodesic <span class="katex-inline">\gamma</span> from <span class="katex-inline">p</span> to <span class="katex-inline">q</span> can be approximated by a chain of graph edges. If the sampling density is high enough, consecutive sample points along <span class="katex-inline">\gamma</span> are within <span class="katex-inline">\varepsilon</span> of each other, giving:</p>
+          <div class="math-block">
+            <span class="katex-display">d_G(x_i, x_j) \leq d(p_i, p_j) + O(\varepsilon)</span>
+          </div>
+
+          <h4>Step 2: Lower bound</h4>
+          <p>Graph paths cannot "shortcut" through the interior of the manifold. Under sufficient sampling density, every graph path stays close to a manifold path of comparable length:</p>
+          <div class="math-block">
+            <span class="katex-display">d_G(x_i, x_j) \geq d(p_i, p_j) - O(\varepsilon)</span>
+          </div>
+
+          <h4>Step 3: Convergence</h4>
+          <p>If <span class="katex-inline">\varepsilon \to 0</span> and <span class="katex-inline">N \varepsilon^d \to \infty</span> (enough points per neighborhood), then:</p>
+          <div class="math-block">
+            <span class="katex-display">\sup_{i,j} \bigl| d_G(x_i, x_j) - d(p_i, p_j) \bigr| \xrightarrow{N \to \infty} 0 \qquad \square</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="viz-container">
+        <canvas id="ch8-isomap"></canvas>
+      </div>
+
+      <p>ISOMAP recovers <em>global</em> geometry (the full distance matrix) from a graph. But global information is expensive and fragile. Can we work with <em>local</em> geometry instead?</p>
+
+
+      <!-- ── Section 3: Local Tangent Spaces and LLE ── -->
+      <h3>Local Tangent Spaces and LLE</h3>
+
+      <p>In Chapter 2, we saw that the tangent space <span class="katex-inline">T_pM</span> provides a local linear approximation to the manifold around <span class="katex-inline">p</span>. Within a small neighborhood, the manifold looks flat, and points can be expressed as affine combinations of their neighbors. Locally Linear Embedding (Roweis and Saul, 2000) turns this geometric insight into an algorithm: instead of approximating distances globally, it captures the tangent-plane structure locally.</p>
+
+      <div class="definition">
+        <div class="definition-label">Notation</div>
+        <p>For each data point <span class="katex-inline">x_i</span>, we write <span class="katex-inline">\mathcal{N}(i)</span> for its set of <span class="katex-inline">k</span> nearest neighbors in <span class="katex-inline">\mathcal{X}</span>.</p>
+      </div>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Locally Linear Reconstruction</div>
+        <p>The <strong>reconstruction weights</strong> for <span class="katex-inline">x_i</span> are the coefficients <span class="katex-inline">w_{ij}</span> minimizing:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">\mathcal{E}_{\text{rec}}(W) = \sum_{i=1}^{N} \left\| x_i - \sum_{j \in \mathcal{N}(i)} w_{ij}\, x_j \right\|^2, \qquad \sum_{j} w_{ij} = 1</span>
+      </div>
+
+      <p>The constraint <span class="katex-inline">\sum_j w_{ij} = 1</span> forces affine (not just linear) combinations, encoding the local tangent-plane geometry. Note that <span class="katex-inline">w_{ij} = 0</span> when <span class="katex-inline">x_j</span> is not a neighbor of <span class="katex-inline">x_i</span>.</p>
+
+      <p>LLE then finds the low-dimensional coordinates <span class="katex-inline">z_1, \dots, z_N \in \mathbb{R}^d</span> that best preserve these weights:</p>
+      <div class="math-block">
+        <span class="katex-display">\mathcal{E}_{\text{embed}}(Z) = \sum_{i=1}^{N} \left\| z_i - \sum_{j \in \mathcal{N}(i)} w_{ij}\, z_j \right\|^2</span>
+      </div>
+
+      <p>The weights <span class="katex-inline">w_{ij}</span> capture how <span class="katex-inline">x_i</span> sits in the local tangent plane spanned by its neighbors. This is the discrete analogue of the "linearize, compute, map back" paradigm from Chapter 7: the reconstruction weights encode local geometry via <span class="katex-inline">\exp_p</span> and <span class="katex-inline">\log_p</span>, and the embedding step transports this structure to <span class="katex-inline">\mathcal{Z}</span>.</p>
+
+      <p>Both ISOMAP and LLE discretize a specific geometric object (distances or tangent planes). A third approach asks: is there a single intrinsic operator that encodes the full geometry of <span class="katex-inline">(M, g)</span>, and can we approximate it from data?</p>
+
+
+      <!-- ── Section 4: Graph Laplacians and Spectral Methods ── -->
+      <h3>Graph Laplacians and Spectral Methods</h3>
+
+      <p>The metric tensor <span class="katex-inline">g_{ij}</span> (Chapter 3) and the volume element <span class="katex-inline">\sqrt{\det g}</span> (Chapter 6) combine into a single differential operator, the <strong>Laplace-Beltrami operator</strong> <span class="katex-inline">\Delta_M</span>, which encodes the full intrinsic geometry of the manifold. Laplacian Eigenmaps (Belkin and Niyogi, 2003) approximate this operator from a point cloud using a graph construction.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Graph Laplacian</div>
+        <p>Given a weighted adjacency matrix <span class="katex-inline">W</span> with heat kernel weights (here <span class="katex-inline">w_{ij}</span> denotes adjacency weights, not the LLE reconstruction weights above):</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">w_{ij} = \exp\!\left( -\frac{\|x_i - x_j\|^2}{2\sigma^2} \right) \quad \text{for neighbors}, \qquad w_{ij} = 0 \quad \text{otherwise}</span>
+      </div>
+      <p>where <span class="katex-inline">\sigma > 0</span> is a global bandwidth parameter. The <strong>graph Laplacian</strong> is <span class="katex-inline">L_G = D_W - W</span>, where <span class="katex-inline">D_W</span> is the diagonal degree matrix with <span class="katex-inline">(D_W)_{ii} = \sum_j w_{ij}</span>.</p>
+
+      <p>This discrete operator approximates a fundamental object from Riemannian geometry:</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Laplace-Beltrami Operator</div>
+        <p>On a Riemannian manifold <span class="katex-inline">(M, g)</span>, the <strong>Laplace-Beltrami operator</strong> generalizes the Euclidean Laplacian:</p>
+      </div>
+      <div class="math-block">
+        <span class="katex-display">\Delta_M f = \frac{1}{\sqrt{\det g}}\, \partial_i \!\left( \sqrt{\det g}\; g^{ij}\, \partial_j f \right)</span>
+      </div>
+
+      <p>This operator depends only on the metric <span class="katex-inline">g_{ij}</span> (Chapter 3) and the volume element <span class="katex-inline">\sqrt{\det g}</span> (Chapter 6). It is an intrinsic invariant: isometric manifolds have the same Laplace-Beltrami spectrum. The Laplacian Eigenmap embedding uses the first <span class="katex-inline">d</span> nontrivial eigenvectors of <span class="katex-inline">L_G</span> as coordinates in <span class="katex-inline">\mathcal{Z}</span>.</p>
+
+      <!-- Proof card: graph Laplacian convergence -->
+      <button class="proof-trigger" onclick="document.getElementById('proof-laplacian-convergence').classList.add('open')">
+        Proof sketch: <span class="katex-inline">L_G \to \Delta_M</span>
+      </button>
+
+      <div class="proof-overlay" id="proof-laplacian-convergence">
+        <div class="proof-card">
+          <button class="proof-card-close" onclick="this.closest('.proof-overlay').classList.remove('open')">&times;</button>
+          <div class="proof-card-title">Proof sketch: Graph Laplacian Converges to Laplace-Beltrami</div>
+
+          <h4>Step 1: Pointwise action</h4>
+          <p>For a smooth function <span class="katex-inline">f</span> on <span class="katex-inline">M</span>, the graph Laplacian acts on sampled values as:</p>
+          <div class="math-block">
+            <span class="katex-display">(L_G f)_i = \sum_{j} w_{ij}\bigl(f(x_i) - f(x_j)\bigr)</span>
+          </div>
+
+          <h4>Step 2: Integral limit</h4>
+          <p>As <span class="katex-inline">N \to \infty</span>, the sum converges to an integral weighted by the heat kernel:</p>
+          <div class="math-block">
+            <span class="katex-display">\frac{1}{N\sigma^2} \sum_{j} w_{ij}\bigl(f(x_i) - f(x_j)\bigr) \;\longrightarrow\; \int_M H_\sigma(x, y)\bigl(f(x) - f(y)\bigr)\, d\text{Vol}(y)</span>
+          </div>
+
+          <h4>Step 3: Taylor expansion</h4>
+          <p>Expanding <span class="katex-inline">f(y)</span> around <span class="katex-inline">x</span> in normal coordinates (Chapter 7) and integrating the heat kernel yields:</p>
+          <div class="math-block">
+            <span class="katex-display">\int_M H_\sigma(x, y)\bigl(f(x) - f(y)\bigr)\, d\text{Vol}(y) = c_d\, \sigma^2\, \Delta_M f(x) + O(\sigma^4)</span>
+          </div>
+          <p>where <span class="katex-inline">c_d</span> is a dimension-dependent constant.</p>
+
+          <h4>Step 4: Spectral convergence</h4>
+          <p>Pointwise convergence of the operator implies convergence of eigenvalues and eigenvectors. As <span class="katex-inline">N \to \infty</span> and <span class="katex-inline">\sigma \to 0</span> at an appropriate rate, the spectrum of <span class="katex-inline">L_G</span> converges to the spectrum of <span class="katex-inline">\Delta_M</span>. <span class="katex-inline">\square</span></p>
+        </div>
+      </div>
+
+      <div class="viz-container">
+        <canvas id="ch8-spectral"></canvas>
+      </div>
+
+      <p>ISOMAP, LLE, and Laplacian Eigenmaps each approximate one geometric object (distances, tangent planes, or the Laplacian). The most recent methods take a different path: they encode the <em>entire neighborhood structure</em> as a probability distribution and optimize an embedding to preserve it. In doing so, UMAP recovers an approximation of the metric tensor <span class="katex-inline">g_{ij}</span> itself.</p>
+
+
+      <!-- ── Section 5: Modern Methods: t-SNE and UMAP ── -->
+      <h3>Modern Methods: t-SNE and UMAP</h3>
+
+      <p>On a Riemannian manifold, the metric <span class="katex-inline">g_{ij}</span> determines how "close" two nearby points are. When the manifold is unknown, we only have Euclidean distances in ambient space, which can be misleading (as the Swiss roll illustrates). Both t-SNE and UMAP address this by converting neighborhood structure into probability distributions that capture intrinsic proximity, then optimizing an embedding to match.</p>
+
+      <h4>t-SNE: Stochastic Neighbor Embedding</h4>
+
+      <p>For each pair <span class="katex-inline">(x_i, x_j)</span>, t-SNE (van der Maaten and Hinton, 2008) defines a <strong>conditional similarity</strong> in the high-dimensional space using a Gaussian kernel with per-point bandwidth <span class="katex-inline">\sigma_i</span>:</p>
+      <div class="math-block">
+        <span class="katex-display">p_{j|i} = \frac{\exp\!\bigl(-\|x_i - x_j\|^2 / 2\sigma_i^2\bigr)}{\sum_{k \neq i} \exp\!\bigl(-\|x_i - x_k\|^2 / 2\sigma_i^2\bigr)}</span>
+      </div>
+
+      <p>The bandwidth <span class="katex-inline">\sigma_i</span> is chosen so that the entropy of the conditional distribution matches a target <strong>perplexity</strong>. The similarities are symmetrized as <span class="katex-inline">p_{ij} = (p_{j|i} + p_{i|j}) / 2N</span>.</p>
+
+      <p>In the low-dimensional space <span class="katex-inline">\mathcal{Z}</span>, similarities use a <strong>Student-t kernel</strong> with one degree of freedom (the Cauchy distribution):</p>
+      <div class="math-block">
+        <span class="katex-display">q_{ij} = \frac{\bigl(1 + \|z_i - z_j\|^2\bigr)^{-1}}{\sum_{k \neq l} \bigl(1 + \|z_k - z_l\|^2\bigr)^{-1}}</span>
+      </div>
+
+      <p>The heavy tails of the Student-t distribution solve the <em>crowding problem</em>: in low dimensions, there is less room to accommodate neighbors, and the heavy tails give distant points more space.</p>
+
+      <p>The embedding is found by minimizing the KL divergence between the two distributions:</p>
+      <div class="math-block">
+        <span class="katex-display">\text{KL}(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}</span>
+      </div>
+
+      <h4>UMAP: Uniform Manifold Approximation</h4>
+
+      <p>UMAP (McInnes, Healy, Melville, 2018) has a more principled geometric foundation. It constructs a <strong>fuzzy simplicial set</strong> representing the topological structure of the data, then optimizes an embedding to match.</p>
+
+      <div class="definition">
+        <div class="definition-label">Notation</div>
+        <p>For each point <span class="katex-inline">x_i</span>, let <span class="katex-inline">\rho_i = \min_{j \in \mathcal{N}(i)} \|x_i - x_j\|</span> be the distance to its nearest neighbor.</p>
+      </div>
+
+      <p>The high-dimensional similarities are defined by normalizing distances relative to <span class="katex-inline">\rho_i</span>:</p>
+      <div class="math-block">
+        <span class="katex-display">p_{j|i} = \exp\!\left( -\frac{\max(0,\; \|x_i - x_j\| - \rho_i)}{\sigma_i} \right)</span>
+      </div>
+
+      <p>This construction has a Riemannian interpretation: at each point <span class="katex-inline">x_i</span>, UMAP builds a <em>local metric</em> by rescaling distances so that the <span class="katex-inline">k</span>-th neighbor is at unit distance. This is equivalent to constructing a local approximation of the metric tensor <span class="katex-inline">g_{ij}</span> from Chapter 3.</p>
+
+      <p>In the low-dimensional space, UMAP uses a smooth approximation to the Student-t family:</p>
+      <div class="math-block">
+        <span class="katex-display">q_{ij} = \bigl(1 + a\,\|z_i - z_j\|^{2b}\bigr)^{-1}</span>
+      </div>
+      <p>where <span class="katex-inline">a, b</span> are fitted to match a target distribution. The embedding minimizes the <strong>binary cross-entropy</strong>:</p>
+      <div class="math-block">
+        <span class="katex-display">\mathcal{L}_{\text{UMAP}} = \sum_{i \neq j} \left[ p_{ij} \log \frac{p_{ij}}{q_{ij}} + (1 - p_{ij}) \log \frac{1 - p_{ij}}{1 - q_{ij}} \right]</span>
+      </div>
+
+      <p>Compared to t-SNE's KL divergence, the cross-entropy includes a <em>repulsive</em> term <span class="katex-inline">(1-p_{ij})\log\frac{1-p_{ij}}{1-q_{ij}}</span> that explicitly pushes apart points that are not neighbors. This makes the optimization more stable and the embedding more faithful to global structure.</p>
+
+
+      <!-- ── Transition to Ch9 ── -->
+      <p>All four families of algorithms (ISOMAP, LLE, spectral methods, UMAP/t-SNE) share a fundamental limitation: they produce a finite set of coordinates <span class="katex-inline">z_1, \dots, z_N \in \mathcal{Z}</span>, but no continuous map between spaces. There is no function that takes a new point in <span class="katex-inline">\mathcal{Z}</span> and produces a point in <span class="katex-inline">\mathcal{X}</span>. Without such a map, we cannot generate new data, compute a metric tensor, or find geodesics in the embedding space. What if a neural network could learn this map explicitly? A decoder <span class="katex-inline">f: \mathcal{Z} \to \mathcal{X}</span> provides exactly what unsupervised manifold learning cannot: a smooth parametric mapping whose Jacobian induces a Riemannian metric <span class="katex-inline">g_{ij}(z) = J(z)^T J(z)</span> on the latent space. In the next chapter, we study this <strong>pullback metric</strong> and show that geodesics in latent space produce geometrically correct interpolations.</p>
 
     </div>
   </section>
@@ -1086,25 +1321,161 @@
     <div class="chapter-number">09</div>
     <h2>Latent Space <span>Geometry</span></h2>
     <p class="chapter-intro">
-      Neural networks learn latent spaces that carry rich geometric structure. Understanding this geometry connects differential geometry to deep learning.
+      Chapter 8 showed that manifold learning algorithms produce embeddings, but not continuous maps. A neural network decoder provides exactly this missing piece, and with it comes a full Riemannian geometry on latent space.
     </p>
     <div class="chapter-body">
-      <h3>Pullback Metrics in Autoencoders</h3>
-      <p>A decoder <span class="katex-inline">f: \mathcal{Z} \to \mathcal{X}</span> induces a Riemannian metric on latent space via the Jacobian:</p>
 
-      <div class="math-block">
-        <span class="katex-display">g_{ij}(z) = J(z)^T J(z), \quad J(z) = \frac{\partial f}{\partial z}</span>
+      <!-- ── Section 1: The Pullback Metric ── -->
+      <h3>The Pullback Metric</h3>
+
+      <p>In Chapter 3, the Riemannian metric <span class="katex-inline">g_{ij}</span> on the sphere <span class="katex-inline">S^2</span> was inherited from its embedding in <span class="katex-inline">\mathbb{R}^3</span>. The metric measured how infinitesimal displacements in coordinates <span class="katex-inline">(\theta, \varphi)</span> translated into distances in the ambient space. Here, the situation is reversed: a decoder <span class="katex-inline">f: \mathcal{Z} \to \mathcal{X}</span> maps <em>from</em> latent coordinates <em>to</em> the ambient data space, and its Jacobian induces a metric on <span class="katex-inline">\mathcal{Z}</span>.</p>
+
+      <div class="definition">
+        <div class="definition-label">Notation</div>
+        <p>A <strong>decoder</strong> is a smooth map <span class="katex-inline">f: \mathcal{Z} \to \mathcal{X}</span> where <span class="katex-inline">\mathcal{Z} = \mathbb{R}^d</span> is the latent space and <span class="katex-inline">\mathcal{X} = \mathbb{R}^D</span> the ambient data space (with <span class="katex-inline">d \leq D</span>). Its <strong>Jacobian</strong> at <span class="katex-inline">z</span> is the <span class="katex-inline">D \times d</span> matrix:</p>
+        <div class="math-block">
+          <span class="katex-display">J(z) = \frac{\partial f}{\partial z}, \quad J(z)^\alpha{}_i = \frac{\partial f^\alpha}{\partial z^i}</span>
+        </div>
       </div>
 
-      <h3>Geodesics in Latent Space</h3>
-      <p>Under the pullback metric, straight-line interpolations in <span class="katex-inline">\mathcal{Z}</span> are replaced by geodesics that respect the learned geometry, producing smoother and more meaningful transitions.</p>
+      <p>When we move by <span class="katex-inline">\mathrm{d}z</span> in latent space, the decoded point moves by <span class="katex-inline">\mathrm{d}x = J(z)\,\mathrm{d}z</span> in data space. The squared length of this displacement is:</p>
+      <div class="math-block">
+        <span class="katex-display">\|\mathrm{d}x\|^2 = \mathrm{d}z^T \, J(z)^T J(z) \, \mathrm{d}z</span>
+      </div>
 
-      <h3>Connections to Representation Learning</h3>
-      <p>Disentangled representations correspond to coordinate systems where the metric tensor is diagonal. The Fisher information metric on statistical manifolds bridges information geometry with neural network training.</p>
+      <div class="definition">
+        <div class="definition-label">Definition — Pullback Metric</div>
+        <p>The <strong>pullback metric</strong> on <span class="katex-inline">\mathcal{Z}</span> induced by the decoder <span class="katex-inline">f</span> is:</p>
+        <div class="math-block">
+          <span class="katex-display">g_{ij}(z) = \bigl(J(z)^T J(z)\bigr)_{ij} = \sum_{\alpha=1}^{D} \frac{\partial f^\alpha}{\partial z^i} \frac{\partial f^\alpha}{\partial z^j}</span>
+        </div>
+        <p>This is the same Riemannian metric <span class="katex-inline">g_{ij}</span> from Chapter 3, now <em>computed</em> from the decoder rather than given by a formula.</p>
+      </div>
+
+      <p>To build intuition, consider a concrete decoder. Let <span class="katex-inline">\mathcal{Z} = \mathbb{R}^2</span> and <span class="katex-inline">\mathcal{X} = \mathbb{R}^3</span>, with:</p>
+      <div class="math-block">
+        <span class="katex-display">f(z_1, z_2) = \bigl(z_1,\; z_2,\; A \exp(-\tfrac{z_1^2 + z_2^2}{2\sigma^2})\bigr)</span>
+      </div>
+      <p>This maps a flat 2D plane to a surface with a Gaussian bump of amplitude <span class="katex-inline">A</span>. Writing <span class="katex-inline">h(z) = A \exp(-\|z\|^2 / 2\sigma^2)</span> for the height function, the Jacobian and metric are:</p>
+      <div class="math-block">
+        <span class="katex-display">J = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ \partial_1 h & \partial_2 h \end{pmatrix}, \qquad g_{ij} = \delta_{ij} + (\partial_i h)(\partial_j h)</span>
+      </div>
+      <p>Far from the origin, <span class="katex-inline">\partial_i h \approx 0</span> and <span class="katex-inline">g_{ij} \approx \delta_{ij}</span>: the metric is flat. Near the bump, the off-diagonal terms grow and the metric becomes curved.</p>
+
+      <!-- Proof card: J^T J is a valid Riemannian metric -->
+      <button class="proof-trigger" onclick="document.getElementById('proof-pullback-metric').classList.add('open')">
+        Proof: <span class="katex-inline">J^T J</span> is a valid Riemannian metric
+      </button>
+
+      <div class="proof-overlay" id="proof-pullback-metric">
+        <div class="proof-card">
+          <button class="proof-card-close" onclick="this.closest('.proof-overlay').classList.remove('open')">&times;</button>
+          <div class="proof-card-title">Proof: The Pullback Metric is Riemannian</div>
+
+          <h4>Claim</h4>
+          <p>If <span class="katex-inline">f: \mathcal{Z} \to \mathcal{X}</span> is a smooth immersion (i.e., <span class="katex-inline">J(z)</span> has full column rank for all <span class="katex-inline">z</span>), then <span class="katex-inline">g_{ij}(z) = (J^T J)_{ij}</span> is a Riemannian metric on <span class="katex-inline">\mathcal{Z}</span>.</p>
+
+          <h4>Step 1: Symmetry</h4>
+          <p><span class="katex-inline">g_{ij} = \sum_\alpha (\partial_i f^\alpha)(\partial_j f^\alpha) = \sum_\alpha (\partial_j f^\alpha)(\partial_i f^\alpha) = g_{ji}</span>.</p>
+
+          <h4>Step 2: Positive-definiteness</h4>
+          <p>For any nonzero tangent vector <span class="katex-inline">v \in T_z\mathcal{Z}</span>:</p>
+          <div class="math-block">
+            <span class="katex-display">g_{ij}\, v^i v^j = \sum_\alpha \Bigl(\sum_i \frac{\partial f^\alpha}{\partial z^i} v^i\Bigr)^2 = \|J(z)\, v\|^2 > 0</span>
+          </div>
+          <p>The strict inequality holds because <span class="katex-inline">J</span> has full column rank, so <span class="katex-inline">Jv = 0</span> implies <span class="katex-inline">v = 0</span>. This is the same full-rank Jacobian condition that ensured parametric surfaces in Chapter 1 were well-defined.</p>
+
+          <h4>Step 3: Smoothness</h4>
+          <p>Since <span class="katex-inline">f</span> is smooth, all partial derivatives <span class="katex-inline">\partial_i f^\alpha</span> are smooth, and products of smooth functions are smooth. <span class="katex-inline">\square</span></p>
+        </div>
+      </div>
+
+
+      <!-- ── Section 2: Geometry of the Latent Metric ── -->
+      <h3>Geometry of the Latent Metric</h3>
+
+      <p>In Chapter 5, Gaussian curvature <span class="katex-inline">K</span> measured how a surface deviates from flatness. In Chapter 6, the volume element <span class="katex-inline">\sqrt{\det g}</span> measured how areas distort under the metric. Both quantities are fully determined by <span class="katex-inline">g_{ij}</span>, and we can compute them explicitly for our decoder.</p>
+
+      <p>For the Gaussian bump surface <span class="katex-inline">f(z) = (z_1, z_2, h(z))</span>, the metric determinant and volume element are:</p>
+      <div class="math-block">
+        <span class="katex-display">\det g = 1 + (\partial_1 h)^2 + (\partial_2 h)^2, \qquad \sqrt{\det g} = \sqrt{1 + \|\nabla h\|^2}</span>
+      </div>
+      <p>Where <span class="katex-inline">\sqrt{\det g} > 1</span>, the decoder stretches latent-space areas. For our bump, this occurs near the origin where the surface is steep.</p>
+
+      <p>The Gaussian curvature follows from the classical Monge-patch formula (Chapter 5):</p>
+      <div class="math-block">
+        <span class="katex-display">K = \frac{\partial_{11}h \cdot \partial_{22}h - (\partial_{12}h)^2}{(1 + (\partial_1 h)^2 + (\partial_2 h)^2)^2}</span>
+      </div>
+      <p>At the top of the bump, <span class="katex-inline">K > 0</span> (positive curvature, like a sphere). On the flanks, <span class="katex-inline">K < 0</span> (negative curvature, like a saddle). Far from the origin, <span class="katex-inline">K \to 0</span> (flat).</p>
+
+      <p>To find geodesics (next section), we need the Christoffel symbols <span class="katex-inline">\Gamma^k_{ij}</span> from Chapter 3. For a graph surface, the Levi-Civita formula from Chapter 6 simplifies beautifully:</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Pullback Christoffel Symbols</div>
+        <p>For a graph decoder <span class="katex-inline">f(z) = (z, h(z))</span>, the Christoffel symbols of the pullback metric reduce to:</p>
+        <div class="math-block">
+          <span class="katex-display">\Gamma^k_{ij}(z) = \frac{(\partial_k h)(\partial_{ij}^2 h)}{\det g}</span>
+        </div>
+        <p>where <span class="katex-inline">\partial_k h</span> are first derivatives and <span class="katex-inline">\partial_{ij}^2 h</span> are second derivatives of the height function.</p>
+      </div>
+
+      <p>This formula is remarkably compact: the Christoffel symbols vanish wherever the surface is flat (<span class="katex-inline">\nabla h = 0</span>), and they are largest where both the slope and curvature of <span class="katex-inline">h</span> are large.</p>
 
       <div class="viz-container">
-        <span class="viz-placeholder">[ interactive: latent space geodesics vs. linear interpolation ]</span>
+        <canvas id="ch9-metric"></canvas>
       </div>
+
+      <p>The left panel shows the decoded surface colored by Gaussian curvature. The right panel shows the latent space <span class="katex-inline">\mathcal{Z}</span>, where the heatmap encodes <span class="katex-inline">\sqrt{\det g}</span> (volume distortion) and the ellipses show the local metric tensor: circles indicate flat regions, elongated ellipses indicate strong stretching. Use the slider to vary the bump amplitude and watch the geometry change.</p>
+
+
+      <!-- ── Section 3: Geodesics in Latent Space ── -->
+      <h3>Geodesics in Latent Space</h3>
+
+      <p>In Chapter 4, geodesics on <span class="katex-inline">S^2</span> were great circles, satisfying the geodesic equation <span class="katex-inline">\ddot{\gamma}^k + \Gamma^k_{ij}\,\dot{\gamma}^i\dot{\gamma}^j = 0</span>. The same equation applies here, with the Christoffel symbols computed from the pullback metric. In latent space <span class="katex-inline">\mathcal{Z} = \mathbb{R}^2</span>, the system becomes:</p>
+
+      <div class="math-block">
+        <span class="katex-display">\ddot{z}^k + \frac{(\partial_k h)(\partial_{ij}^2 h)}{\det g}\,\dot{z}^i\dot{z}^j = 0, \qquad k = 1, 2</span>
+      </div>
+
+      <p>This is the <strong>payoff of the entire blog</strong>. A "straight line" in latent space (linear interpolation <span class="katex-inline">z(t) = (1-t)\,z_A + t\,z_B</span>) ignores the geometry: its decoded image may climb over the bump, taking a longer path on the surface. The geodesic curves <em>in latent space</em> to avoid high-metric regions, producing a decoded path that is shorter on the surface.</p>
+
+      <div class="definition">
+        <div class="definition-label">Definition — Latent Geodesic</div>
+        <p>A <strong>latent geodesic</strong> is a curve <span class="katex-inline">\gamma: [0,1] \to \mathcal{Z}</span> satisfying the geodesic equation with Christoffel symbols <span class="katex-inline">\Gamma^k_{ij}(z)</span> computed from the pullback metric <span class="katex-inline">g_{ij}(z) = (J^T J)_{ij}</span>. Its image <span class="katex-inline">f \circ \gamma</span> traces the shortest path on the decoded surface between <span class="katex-inline">f(z_A)</span> and <span class="katex-inline">f(z_B)</span>.</p>
+      </div>
+
+      <div class="viz-container">
+        <canvas id="ch9-geodesic"></canvas>
+      </div>
+
+      <p>Drag the endpoints A and B in the latent space panel. When the straight line (orange, dashed) passes through the bump region, the geodesic (cyan, solid) curves around it. The surface lengths confirm that the geodesic finds a shorter path on the decoded surface, even though it is longer in Euclidean latent coordinates.</p>
+
+
+      <!-- ── Section 4: Connections to Representation Learning ── -->
+      <h3>Connections to Representation Learning</h3>
+
+      <p>In Chapter 6, an isometry was a map that preserves the metric: <span class="katex-inline">\phi^*g = g</span>. An ideal representation would make the pullback metric as close to flat as possible, so that Euclidean operations in <span class="katex-inline">\mathcal{Z}</span> (linear interpolation, nearest neighbors, averaging) would be geometrically correct.</p>
+
+      <p>A <strong>disentangled representation</strong> corresponds to coordinates where the metric tensor is diagonal: <span class="katex-inline">g_{12}(z) = 0</span> everywhere. In such coordinates, the latent dimensions are geometrically independent, and moving along one axis does not affect distances measured along another. The off-diagonal terms <span class="katex-inline">g_{ij}</span> with <span class="katex-inline">i \neq j</span> quantify the degree of geometric entanglement.</p>
+
+      <p>A perfectly flat representation (<span class="katex-inline">g_{ij} = \delta_{ij}</span> everywhere) would make the decoder an <strong>isometry</strong>. But the Theorema Egregium from Chapter 5 tells us this is impossible whenever the data manifold has nonzero Gaussian curvature: you cannot flatten a curved surface without distortion. This is a fundamental obstruction, not a limitation of the architecture.</p>
+
+      <p>The <strong>Fisher information metric</strong> provides another instance of the pullback construction. For a parametric family of distributions <span class="katex-inline">p_\omega(x)</span>, the Fisher metric <span class="katex-inline">F_{ij}(\omega) = \mathbb{E}[\partial_i \log p_\omega \cdot \partial_j \log p_\omega]</span> is the pullback of the <span class="katex-inline">L^2</span> metric on the space of square-root densities. In a variational autoencoder (VAE), the KL regularization term penalizes deviations of the posterior from a standard Gaussian, which has the geometric effect of encouraging a <em>flat</em> latent metric. This provides a probabilistic motivation for geometric regularity.</p>
+
+      <p>Whether we seek disentanglement, isometry, or information-theoretic regularity, the pullback metric <span class="katex-inline">g_{ij}(z) = J(z)^T J(z)</span> is the unifying language. It measures exactly what a decoder does to geometry, and any notion of "representation quality" can be phrased as a constraint on this tensor.</p>
+
+
+      <!-- ── Section 5: Closing the Loop ── -->
+      <h3>Closing the Loop</h3>
+
+      <p>We opened this blog with a question: <strong>what is a straight line on a curved surface?</strong></p>
+
+      <p>The answer required nine layers of mathematical structure: a <em>manifold</em> to define "surface" (Chapter 1), <em>tangent spaces</em> to define "direction" (Chapter 2), a <em>connection and metric</em> to define "straight" (Chapter 3), the <em>geodesic equation</em> to define "line" (Chapter 4), <em>curvature</em> to measure how far from flat (Chapter 5), <em>metric geometry</em> to measure distance and volume (Chapter 6), the <em>exponential map</em> to go from direction to destination (Chapter 7), <em>manifold learning</em> to discover the surface from data (Chapter 8), and the <em>pullback metric</em> to compute all of the above when the surface is learned by a neural network (Chapter 9).</p>
+
+      <p>A straight line on a curved surface is a <strong>geodesic</strong>: a curve <span class="katex-inline">\gamma</span> satisfying <span class="katex-inline">\nabla_{\dot{\gamma}} \dot{\gamma} = 0</span>. It parallel-transports its own velocity, has zero intrinsic acceleration, and is a critical point of the energy functional <span class="katex-inline">E[\gamma]</span>. In a latent space equipped with the pullback metric <span class="katex-inline">g_{ij}(z) = J(z)^T J(z)</span>, the geodesic is the curve whose decoded image traces the shortest path on the learned manifold. Linear interpolation in latent space ignores the geometry; the geodesic respects it.</p>
+
+      <p>Every curved space has its own notion of straightness. Learning that notion from data is the meeting point of differential geometry and deep learning.</p>
+
     </div>
   </section>
 
@@ -1123,6 +1494,8 @@
   <script defer src="assets/js/ch5.js"></script>
   <script defer src="assets/js/ch6.js"></script>
   <script defer src="assets/js/ch7.js"></script>
+  <script defer src="assets/js/ch8.js"></script>
+  <script defer src="assets/js/ch9.js"></script>
   <script>
   // Render KaTeX after load
   window.addEventListener('DOMContentLoaded', function () {
